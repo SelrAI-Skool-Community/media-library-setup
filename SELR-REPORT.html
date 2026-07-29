@@ -1,0 +1,455 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="selr-skill-report/1"><title>Skill report — media-library-setup</title><style>⁠​‌​‌​​‌‌​‌​​​‌​‌​‌​​‌‌​​​‌​‌​​‌​​​‌‌​​​‌⁠
+/* ============================================================
+   Selr AI skill report — design system cloned from the
+   2026-07 ecosystem report. Keep CSS as-is; swap content only.
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0}
+.viz-root{
+  color-scheme:light;
+  --page:#f9f9f7; --card:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,0.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
+  --other:#c3c2b7; --shade-a:#86b6ef; --shade-b:#2a78d6; --track:#cde2fb;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --up-good:#006300;
+  --sr:#6736e2;
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--page); color:var(--ink); font-family:var(--font);
+  -webkit-font-smoothing:antialiased; line-height:1.55;
+}
+@media (prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])) .viz-root{
+    color-scheme:dark;
+    --page:#0d0d0d; --card:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+    --other:#52514e; --shade-a:#1c5cab; --shade-b:#3987e5; --track:#0d366b;
+    --up-good:#0ca30c; --sr:#7e4bff;
+  }
+}
+:root[data-theme="dark"] .viz-root{
+  color-scheme:dark;
+  --page:#0d0d0d; --card:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+  --other:#52514e; --shade-a:#1c5cab; --shade-b:#3987e5; --track:#0d366b;
+  --up-good:#0ca30c; --sr:#7e4bff;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px 96px}
+header.top{position:sticky;top:0;z-index:9;background:var(--page);
+  border-bottom:1px solid var(--border);padding:14px 0 10px;margin-bottom:28px}
+.top-in{max-width:1040px;margin:0 auto;padding:0 20px;display:flex;gap:16px;
+  align-items:center;flex-wrap:wrap}
+.brand{font-weight:650;font-size:15px;letter-spacing:-0.01em;margin-right:auto;flex:none;
+  display:inline-flex;align-items:center;gap:10px}
+.brand .logo{height:21px;width:auto;flex:none;display:block}
+.brand .sep{color:var(--muted);font-weight:450}
+nav{display:flex;gap:14px;flex:1 1 auto;min-width:0;overflow-x:auto;
+  justify-content:flex-end;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{color:var(--ink-2);text-decoration:none;font-size:12.5px;
+  white-space:nowrap;border-bottom:1px solid transparent;padding-bottom:2px}
+nav a:hover{color:var(--ink);border-bottom-color:var(--axis)}
+button.theme{font:inherit;font-size:12.5px;color:var(--ink-2);background:var(--card);
+  border:1px solid var(--border);border-radius:999px;padding:5px 13px;cursor:pointer;flex:none}
+button.theme:hover{color:var(--ink)}
+h1{font-size:30px;line-height:1.2;letter-spacing:-0.02em;margin:8px 0 6px;font-weight:680}
+h2{font-size:20px;letter-spacing:-0.01em;margin:0 0 6px;font-weight:650}
+h3{font-size:14px;margin:0 0 4px;font-weight:620}
+p.sub{color:var(--ink-2);margin:0 0 22px;font-size:14px;max-width:74ch}
+p.note{color:var(--muted);font-size:12.5px;margin:10px 0 0;max-width:78ch}
+section{margin:0 0 44px;scroll-margin-top:78px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.cards2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.tile{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.tile .lab{color:var(--ink-2);font-size:12.5px;margin:0 0 8px}
+.tile .val{font-size:38px;line-height:1.05;font-weight:660;letter-spacing:-0.025em;
+  display:block;color:var(--ink)}
+.tile .val .unit{font-size:16px;font-weight:550;color:var(--ink-2);letter-spacing:0;
+  margin-left:6px}
+.tile .cap{color:var(--muted);font-size:11.5px;margin:9px 0 0;line-height:1.45}
+.hero{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:26px;display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.hero .figure{font-size:60px;font-weight:680;letter-spacing:-0.03em;line-height:1}
+.hero .body{flex:1 1 320px;min-width:260px}
+.pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:5px 13px;
+  font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--page)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.good .dot,.dot.good{background:var(--good)} .warning .dot,.dot.warning{background:var(--warning)}
+.critical .dot,.dot.critical{background:var(--critical)} .serious .dot,.dot.serious{background:var(--serious)}
+.chart-scroll{overflow-x:auto;margin:4px 0 0;-webkit-overflow-scrolling:touch}
+svg.chart{display:block;min-width:600px;font-family:var(--font)}
+svg .t-pri{fill:var(--ink)} svg .t-sec{fill:var(--ink-2)} svg .t-mut{fill:var(--muted)}
+svg .b{font-weight:620} svg .num{font-variant-numeric:tabular-nums}
+svg .grid{stroke:var(--grid);stroke-width:1} svg .axis{stroke:var(--axis);stroke-width:1}
+svg .s1{fill:var(--s1)} svg .s2{fill:var(--s2)} svg .s3{fill:var(--s3)}
+svg .s4{fill:var(--s4)} svg .s5{fill:var(--s5)} svg .s6{fill:var(--s6)}
+svg .other{fill:var(--other)} svg .track{fill:var(--track)}
+svg .node{fill:var(--page);stroke:var(--border);stroke-width:1}
+svg .node.accent{stroke:var(--sr);stroke-width:1.5}
+svg .edge{stroke:var(--axis);stroke-width:1.5;fill:none}
+svg .edge-head{fill:var(--axis)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--ink-2);font-weight:600;font-size:12px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+  background:var(--page);border:1px solid var(--border);border-radius:6px;padding:2px 6px;
+  word-break:break-word}
+.table-scroll{overflow-x:auto;margin-top:10px}
+.issue{border:1px solid var(--border);border-radius:14px;padding:18px 20px;background:var(--card)}
+.issue .head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.issue p{margin:0 0 4px;font-size:13px;color:var(--ink-2)}
+/* --- Verdict banner: the thing you cannot skim past --- */
+.verdict{position:relative;border:1px solid var(--border);border-radius:16px;padding:26px 26px 26px 34px;
+  display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-bottom:16px;overflow:hidden}
+.verdict::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--vc)}
+.verdict.good{--vc:var(--good);background:color-mix(in srgb,var(--good) 7%,var(--card))}
+.verdict.warning{--vc:var(--warning);background:color-mix(in srgb,var(--warning) 9%,var(--card))}
+.verdict.critical{--vc:var(--critical);background:color-mix(in srgb,var(--critical) 8%,var(--card))}
+.verdict .score{flex:none;text-align:center;min-width:132px}
+.verdict .score .n{font-size:66px;font-weight:700;letter-spacing:-0.035em;line-height:1;color:var(--ink)}
+.verdict .score .of{font-size:13px;color:var(--muted);margin-top:2px}
+.verdict .vbody{flex:1 1 340px;min-width:280px}
+.verdict .vlab{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--vc);
+  font-weight:700;margin:0 0 6px}
+.verdict h2{font-size:25px;margin:0 0 10px;letter-spacing:-0.02em}
+.verdict .bottom{font-size:15px;color:var(--ink);margin:0 0 8px;font-weight:560;line-height:1.5}
+.verdict .vnote{color:var(--ink-2);font-size:13px;margin:0}
+/* --- Deep explainer: numbered walkthrough --- */
+.steps{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:16px}
+.step{border:1px solid var(--border);border-radius:12px;padding:15px 16px;background:var(--page)}
+.step .sn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border-radius:50%;background:var(--sr);color:#fff;font-size:12px;font-weight:700;margin-bottom:9px}
+.step h4{font-size:13.5px;margin:0 0 5px;font-weight:640;letter-spacing:-0.01em}
+.step p{margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.step .who{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:0.07em;
+  color:var(--muted);margin-bottom:7px;font-weight:600}
+.say{border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--page);margin-top:14px}
+.say h4{font-size:13px;margin:0 0 10px;font-weight:640}
+.say ul{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.say li{font-size:13px;color:var(--ink);padding-left:16px;position:relative}
+.say li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;
+  background:var(--sr)}
+.say li span{color:var(--muted);font-size:12px}
+footer.sr-foot{color:var(--muted);font-size:12px;border-top:1px solid var(--border);
+  padding-top:18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+footer.sr-foot .logo{height:15px;width:auto;flex:none}
+footer.sr-foot b{color:var(--ink-2);font-weight:650}
+@media (max-width:640px){
+  h1{font-size:24px} .hero .figure{font-size:46px} .tile .val{font-size:31px}
+  .wrap{padding:0 14px 72px} .top-in{padding:0 14px} .card{padding:17px}
+  header.top{position:static} section{scroll-margin-top:12px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body data-kit="sk-w3709n"><div class="viz-root">
+
+<!-- ====== BRAND HEADER — keep the lockup exactly as-is ====== -->
+<header class="top"><div class="top-in">
+  <span class="brand">
+    <svg class="logo" viewBox="430 402 440 95" xmlns="http://www.w3.org/2000/svg" aria-label="Selr AI"><path fill="var(--sr)" d="M466.43,429.13h48.92v-24.47h-67.3c-8.91,0-16.13,7.22-16.13,16.13,0,5.23,2.54,10.14,6.8,13.16l27.71,19.65v-24.47Z"/><path fill="var(--sr)" d="M483.68,446.39v24.47h-49.91v24.47h68.29c8.91,0,16.13-7.22,16.13-16.14,0-5.23-2.54-10.14-6.8-13.16l-27.71-19.65Z"/><path fill="var(--ink)" d="M619.04,448.4c-3.69-1.57-8.46-3.13-14.34-4.7-4.23-1.1-7.54-2.1-9.93-3-2.39-.9-4.39-2.13-6-3.7-1.61-1.57-2.41-3.64-2.41-6.23,0-2.12.65-4.04,1.94-5.76,1.29-1.72,3.07-3.07,5.35-4.06,2.27-.98,4.86-1.47,7.76-1.47,4.78,0,8.68,1.29,11.7,3.88,3.02,2.59,4.88,5.96,5.58,10.11l13.05-2.7c-.63-4.39-2.25-8.29-4.88-11.7-2.63-3.41-6.1-6.07-10.41-7.99-4.31-1.92-9.17-2.88-14.58-2.88s-10.33,1.02-14.75,3.06c-4.43,2.04-7.9,4.82-10.4,8.35-2.51,3.53-3.76,7.49-3.76,11.87,0,5.25,1.29,9.46,3.88,12.64,2.59,3.17,5.68,5.53,9.29,7.05,3.6,1.53,8.31,3.04,14.11,4.53,4.31,1.17,7.74,2.25,10.29,3.23,2.54.98,4.64,2.31,6.29,4,1.65,1.69,2.47,3.9,2.47,6.64,0,2.27-.7,4.31-2.12,6.11-1.41,1.8-3.37,3.23-5.88,4.29-2.51,1.06-5.37,1.59-8.58,1.59-5.33,0-9.58-1.21-12.76-3.64-3.17-2.43-5.15-5.88-5.94-10.35l-13.05,2.7c1.02,6.9,4.35,12.38,9.99,16.46,5.64,4.08,12.77,6.11,21.4,6.11,5.64,0,10.78-1.02,15.4-3.06,4.62-2.04,8.27-4.86,10.93-8.46,2.66-3.6,4-7.64,4-12.11,0-5.64-1.35-10.13-4.06-13.46-2.7-3.33-5.9-5.78-9.58-7.35"/><path fill="var(--ink)" d="M684.58,435.17c-4.98-3.17-10.64-4.76-16.99-4.76-5.8,0-11.09,1.37-15.87,4.11-4.78,2.74-8.54,6.51-11.29,11.29-2.75,4.78-4.11,10.07-4.11,15.87s1.39,11.07,4.17,15.81c2.78,4.74,6.6,8.48,11.46,11.23,4.86,2.75,10.27,4.11,16.22,4.11,6.35,0,12.01-1.53,16.99-4.59,4.98-3.06,8.8-7.13,11.46-12.23l-10.35-4.59c-1.72,3.37-4.13,6-7.23,7.88-3.1,1.88-6.6,2.82-10.52,2.82s-7.29-.9-10.35-2.7c-3.06-1.8-5.45-4.25-7.17-7.35-1.09-1.95-1.83-4.05-2.23-6.29h49.73c.7-6.43-.2-12.34-2.7-17.75-2.51-5.41-6.25-9.7-11.23-12.87M657.89,443.81c2.94-1.8,6.17-2.7,9.7-2.7s6.7.82,9.52,2.47c2.82,1.65,5.07,3.92,6.76,6.82,1.05,1.8,1.8,3.72,2.25,5.76h-37.06c.42-1.73,1.05-3.38,1.89-4.94,1.68-3.13,4-5.6,6.94-7.41"/><rect fill="var(--ink)" x="704.5" y="404.66" width="12.34" height="87"/><path fill="var(--ink)" d="M750,431.29c-3.37,1.06-6.27,3.35-8.7,6.88-1.7,2.47-3.07,5.6-4.11,9.38v-15.96h-12.34v60.08h12.34v-33.98c0-3.76,1.04-7,3.11-9.7,2.08-2.7,4.92-4.53,8.52-5.47,3.6-.94,7.52-.82,11.76.35v-11.76c-3.68-.94-7.21-.88-10.58.18"/><path fill="var(--ink)" d="M810.24,409.36l-35.74,82.3h9.41l9.47-21.98h43.13l9.47,21.98h9.64l-35.62-82.3h-9.76ZM796.93,461.44l18.02-41.82,18.02,41.82h-36.04Z"/><rect fill="var(--ink)" x="859.03" y="409.36" width="9.05" height="82.3"/></svg><span class="sep">·</span><span style="color:var(--ink-2);font-weight:550">Skill report</span>
+  </span>
+  <nav>
+    <a href="#overview">Overview</a><a href="#what">What it does</a><a href="#inside">Inside the skill</a>
+    <a href="#security">Security</a><a href="#fit">Business fit</a><a href="#verdict">Verdict</a>
+  </nav>
+  <button class="theme" id="themeBtn" type="button">Dark mode</button>
+</div></header>
+
+<div class="wrap">
+
+<!-- ====== OVERVIEW ====== -->
+<section id="overview">
+  <h1>media-library-setup</h1>
+  <p class="sub">Installed to ~/.claude/skills/media-library-setup · reviewed 29 Jul 2026.
+  A skill is a folder of written instructions your AI picks up when your request matches it.
+  This report is what Selr AI found when it read every file inside before letting it run.</p>
+
+  <div class="verdict good">
+    <div class="score">
+      <div class="n">85</div>
+      <div class="of">out of 100</div>
+      <div class="pill good" style="margin-top:10px"><span class="dot"></span>Safe to use</div>
+    </div>
+    <div class="vbody">
+      <p class="vlab">The verdict</p>
+      <h2>Safe to use — it cannot delete your files</h2>
+      <p class="bottom">If you only read one line: this skill moves your photos and videos into
+      tidier folders, and there is no line of code anywhere in it that deletes one of your files.
+      It shows you two pictures of exactly what it plans to do and refuses to move anything until
+      a person says yes by name.</p>
+      <p class="vnote">Every file was opened and read in full. Scored across six checks: hidden
+      instructions, network calls, credential access, destructive commands, obfuscated code, and
+      scope of permissions. Two flags, both explained below, neither a risk to your data.</p>
+    </div>
+  </div>
+
+  <div class="grid kpis">
+    <div class="tile"><p class="lab">Files inside</p><span class="val">9</span>
+      <p class="cap">Every one was opened and read for this report.</p></div>
+    <div class="tile"><p class="lab">Always-on cost</p><span class="val">84<span class="unit">tokens</span></span>
+      <p class="cap">What this skill adds to every conversation before you type. Healthy is under 80, so this is a shade high but harmless.</p></div>
+    <div class="tile"><p class="lab">Scripts it can run</p><span class="val">2</span>
+      <p class="cap">One does the work, one is a self-test. Both reviewed below.</p></div>
+    <div class="tile"><p class="lab">Network calls</p><span class="val">1</span>
+      <p class="cap">Only OpenAI, only for transcribing, only after you approve the cost.</p></div>
+  </div>
+</section>
+
+<!-- ====== WHAT IT DOES ====== -->
+<section id="what">
+  <h2>How it works, in plain English</h2>
+  <p class="sub">This is the part worth reading. Four things are involved: <b>you</b>, <b>your AI</b>,
+  <b>the skill</b> (a folder of written instructions), and <b>your files</b>. The diagram shows who
+  does what, in order, and where your information actually goes.</p>
+
+  <div class="card">
+    <h3>Who does what, step by step</h3>
+    <div class="chart-scroll"><svg class="chart" viewBox="0 0 940 470" role="img"
+      aria-label="Swimlane diagram: you ask, your AI reads the folder, the skill counts and plans, two pictures are drawn, you approve, then files move and are transcribed">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+        orient="auto"><path class="edge-head" d="M0,0L10,5L0,10z"/></marker></defs>
+
+      <rect x="104" y="46" width="826" height="94" rx="8" fill="var(--page)"/>
+      <rect x="104" y="234" width="826" height="94" rx="8" fill="var(--page)"/>
+      <text class="t-sec b" x="12" y="97" font-size="12">You</text>
+      <text class="t-sec b" x="12" y="191" font-size="12">Your AI</text>
+      <text class="t-sec b" x="12" y="285" font-size="12">The skill</text>
+      <text class="t-sec b" x="12" y="379" font-size="12">Your files</text>
+      <text class="t-mut" x="12" y="26" font-size="10.5">WHO ACTS</text>
+
+      <!-- 1 you ask -->
+      <circle cx="120" cy="52" r="10" fill="var(--sr)"/>
+      <text x="120" y="56" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+      <g><rect class="node accent" x="112" y="64" width="150" height="56" rx="10"/>
+        <text class="t-pri b" x="187" y="88" font-size="13" text-anchor="middle">You ask for it</text>
+        <text class="t-sec" x="187" y="106" font-size="11" text-anchor="middle">"organise my Drive"</text></g>
+      <path class="edge" d="M262,92 H271 V186 H276" marker-end="url(#ah)"/>
+
+      <!-- 2 AI picks skill -->
+      <circle cx="288" cy="146" r="10" fill="var(--sr)"/>
+      <text x="288" y="150" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+      <g><rect class="node" x="280" y="158" width="150" height="56" rx="10"/>
+        <text class="t-pri b" x="355" y="182" font-size="13" text-anchor="middle">AI picks this skill</text>
+        <text class="t-sec" x="355" y="200" font-size="11" text-anchor="middle">matched on its description</text></g>
+      <path class="edge" d="M430,186 H439 V374 H444" marker-end="url(#ah)"/>
+
+      <!-- 3 counts your files (read only) -->
+      <circle cx="456" cy="334" r="10" fill="var(--sr)"/>
+      <text x="456" y="338" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+      <g><rect class="node" x="448" y="346" width="150" height="56" rx="10"/>
+        <text class="t-pri b" x="523" y="370" font-size="13" text-anchor="middle">Counts your files</text>
+        <text class="t-sec" x="523" y="388" font-size="11" text-anchor="middle">reads only, changes nothing</text></g>
+      <path class="edge" d="M598,374 H607 V280 H612" marker-end="url(#ah)"/>
+
+      <!-- 4 draws the two pictures -->
+      <circle cx="624" cy="240" r="10" fill="var(--sr)"/>
+      <text x="624" y="244" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">4</text>
+      <g><rect class="node" x="616" y="252" width="150" height="56" rx="10"/>
+        <text class="t-pri b" x="691" y="276" font-size="13" text-anchor="middle">Draws two pictures</text>
+        <text class="t-sec" x="691" y="294" font-size="11" text-anchor="middle">before / after, colour-coded</text></g>
+      <path class="edge" d="M766,280 H779 V92 H788" marker-end="url(#ah)"/>
+
+      <!-- 5 you approve -->
+      <circle cx="800" cy="52" r="10" fill="var(--sr)"/>
+      <text x="800" y="56" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">5</text>
+      <g><rect class="node accent" x="792" y="64" width="138" height="56" rx="10"/>
+        <text class="t-pri b" x="861" y="88" font-size="13" text-anchor="middle">You say yes</text>
+        <text class="t-sec" x="861" y="106" font-size="11" text-anchor="middle">by name, or nothing moves</text></g>
+      <path class="edge" d="M861,120 V150 H700 V346" marker-end="url(#ah)"/>
+
+      <!-- 6 files move -->
+      <circle cx="708" cy="334" r="10" fill="var(--sr)"/>
+      <text x="708" y="338" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">6</text>
+      <g><rect class="node accent" x="700" y="346" width="160" height="56" rx="10"/>
+        <text class="t-pri b" x="780" y="370" font-size="13" text-anchor="middle">Only now, files move</text>
+        <text class="t-sec" x="780" y="388" font-size="11" text-anchor="middle">every move written down first</text></g>
+
+      <line class="grid" x1="104" y1="430" x2="930" y2="430" stroke-dasharray="4 4"/>
+      <text class="t-mut" x="104" y="450" font-size="11">Steps 1 to 6 all happen on your own computer. Only the optional transcribing step sends anything out, and only after you approve the cost.</text>
+    </svg></div>
+
+    <div class="steps">
+      <div class="step"><span class="sn">1</span><span class="who">You</span>
+        <h4>You ask in normal words</h4>
+        <p>No command to memorise, no folder ID to find. You say your Drive is a mess and your AI works out this is the right tool for it.</p></div>
+      <div class="step"><span class="sn">2</span><span class="who">Your AI</span>
+        <h4>It matches your request to the skill</h4>
+        <p>Your AI holds a one-line summary of every skill you own. Yours matches this one, so it opens that folder and ignores the rest.</p></div>
+      <div class="step"><span class="sn">3</span><span class="who">The skill</span>
+        <h4>It counts what you have, touching nothing</h4>
+        <p>It walks your folder and tallies videos, photos and documents, how deep the folders go, and how many hold barely anything. This step only reads. Nothing is moved, renamed or opened.</p></div>
+      <div class="step"><span class="sn">4</span><span class="who">The skill</span>
+        <h4>It draws you two pictures</h4>
+        <p>One shows your folders now against the folders it proposes, with the near-empty ones marked in red. The other shows where each kind of file would end up. Both open in your browser. Still nothing has moved.</p></div>
+      <div class="step"><span class="sn">5</span><span class="who">You</span>
+        <h4>You decide, and it needs your name</h4>
+        <p>This is the gate. It will not move a file until someone is named as having approved it, and it checks that the plan has not changed since those pictures were drawn. If you want something different, it redraws for free.</p></div>
+      <div class="step"><span class="sn">6</span><span class="who">Your files</span>
+        <h4>Files move, and every move is written down</h4>
+        <p>Each file is moved into Videos, Photos, Documents or _Index, and logged to a rollback file as it goes. Two files with the same name both survive — the second gets a number. Nothing is ever deleted.</p></div>
+    </div>
+
+    <div class="say">
+      <h4>What you would actually say to set this off</h4>
+      <ul>
+        <li>"Organise my Google Drive media folder" <span>— the main path; it checks your setup first and installs anything missing</span></li>
+        <li>"What do I still need to set up?" <span>— lists everything missing at once, with the fix for each</span></li>
+        <li>"Show me what you'd change first" <span>— stops at the two pictures, no commitment</span></li>
+        <li>"Transcribe my videos so I can search them" <span>— the optional paid step, price quoted before anything is sent</span></li>
+        <li>"Find the bit where someone talks about pricing" <span>— works once transcribing is done</span></li>
+      </ul>
+    </div>
+
+    <p class="note">The one thing that leaves your computer: if you choose to transcribe, the audio
+    from each video is sent to OpenAI to be turned into text. It tells you the exact dollar cost
+    first and sends nothing until you confirm. Your photos and documents are never sent anywhere.</p>
+  </div>
+</section>
+
+<!-- ====== INSIDE ====== -->
+<section id="inside">
+  <h2>Inside the skill, file by file</h2>
+  <p class="sub">Each file, what it is for, and whether it raised anything during review.</p>
+  <div class="card"><div class="table-scroll"><table>
+    <tr><th>File</th><th>What it is</th><th class="n">Size</th><th>Review</th></tr>
+    <tr><td><code>SKILL.md</code></td><td>The step-by-step your AI follows, from install to finished library</td><td class="n">12 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+    <tr><td><code>scripts/library.py</code></td><td>Does all the work: checking your setup, counting, planning, drawing the pictures, moving, transcribing</td><td class="n">40 KB</td>
+      <td><span class="pill warning"><span class="dot"></span>Moves files · 1 network call</span></td></tr>
+    <tr><td><code>scripts/smoke.sh</code></td><td>A self-test that proves the safety gates still work. Runs offline, touches nothing</td><td class="n">8 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+    <tr><td><code>references/setup.md</code></td><td>The three installs, with links and a fix for each way they fail</td><td class="n">8 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+    <tr><td><code>references/structure-rules.md</code></td><td>Why the folders stay flat, and the rule that stops them nesting</td><td class="n">4 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+    <tr><td><code>examples/…session.md</code></td><td>A worked example of a real run</td><td class="n">4 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+    <tr><td><code>SETUP-PROMPT.md</code></td><td>Paste-into-Claude installer and check</td><td class="n">4 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+    <tr><td><code>CHANGELOG.md</code></td><td>What changed and when</td><td class="n">4 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+    <tr><td><code>SELR-REPORT.html</code></td><td>This page, so it travels with the skill</td><td class="n">40 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+  </table></div>
+  <p class="note">Sizes are on-disk. "Clean" means the file was read in full and nothing in it
+  tries to hide instructions, reach the internet, or touch credentials.</p></div>
+</section>
+
+<!-- ====== SECURITY ====== -->
+<section id="security">
+  <h2>Security review</h2>
+  <p class="sub">Six checks, run by reading every file — not by trusting the skill's own description.
+  A skill can contain instructions aimed at your AI, so each file is treated as untrusted until read.</p>
+  <div class="grid cards2">
+    <div class="issue"><div class="head"><span class="pill good"><span class="dot"></span>Pass</span><h3>Hidden instructions</h3></div>
+      <p>No text anywhere tells your AI to act secretly, skip a check, or hide anything from you.
+      There is a short invisible provenance mark and a resolver-key line — Selr AI's own ownership
+      stamp, present across the whole library. It carries an identifier, not an instruction, and
+      changes nothing about how the skill behaves.</p></div>
+    <div class="issue"><div class="head"><span class="pill good"><span class="dot"></span>Pass</span><h3>Credential access</h3></div>
+      <p>Never reads your SSH keys, browser data, password manager or cloud credentials. It reads
+      one thing: the <code>OPENAI_API_KEY</code> you set yourself, and only when transcribing. The
+      setup guide has you check that key is present without ever printing it.</p></div>
+    <div class="issue"><div class="head"><span class="pill warning"><span class="dot"></span>Flag</span><h3>Network calls</h3></div>
+      <p>One destination: OpenAI's transcription service, at <code>library.py</code> line 719.
+      Audio taken from your videos is sent there to be turned into text. It is the whole point of
+      that step, it quotes the cost in dollars first, and it sends nothing without <code>--yes</code>.
+      Skip the transcribe step and this skill makes no network calls at all.</p></div>
+    <div class="issue"><div class="head"><span class="pill warning"><span class="dot"></span>Flag</span><h3>Destructive commands</h3></div>
+      <p>It moves your files, which is what you asked it for, so this is worth understanding rather
+      than worrying about. <b>There is no code in this skill that deletes a file of yours.</b> The
+      only deletions are its own temporary audio scratch files. It removes empty folders left behind
+      by the move, and only ones that are genuinely empty. Every move is written to
+      <code>rollback.csv</code> so the whole thing can be reversed.</p></div>
+    <div class="issue"><div class="head"><span class="pill good"><span class="dot"></span>Pass</span><h3>Obfuscated code</h3></div>
+      <p>All plain, readable Python using the standard library plus OpenAI's official package. No
+      encoded blobs, no <code>eval</code>, no self-modifying code, no binaries.</p></div>
+    <div class="issue"><div class="head"><span class="pill good"><span class="dot"></span>Pass</span><h3>Scope of permissions</h3></div>
+      <p>Works only inside the folder you point it at, plus its own scratch folder at
+      <code>~/active/media-library-setup</code>. No scheduled tasks, no startup items, no edits to
+      your settings, and it does not reach into any other skill.</p></div>
+  </div>
+</section>
+
+<!-- ====== BUSINESS FIT ====== -->
+<section id="fit">
+  <h2>What this does for your business</h2>
+  <p class="sub">Based on what the skill can actually do — not its marketing description.</p>
+  <div class="grid cards2">
+    <div class="card"><h3>Where it earns its keep</h3>
+      <p style="font-size:13px;color:var(--ink-2);margin:0 0 8px">Anyone shooting content that piles
+      up faster than it gets filed. A camera roll dumped into Drive after every event turns into
+      hundreds of folders nobody opens twice. This turns that into two levels you can scroll, and
+      a transcript layer that lets you ask for a moment instead of hunting a filename.</p>
+      <p class="note">Best fit: a business producing regular video or photo content — events,
+      workshops, client shoots, social — where finding an old clip currently means twenty minutes
+      of clicking.</p></div>
+    <div class="card"><h3>Three ways to use it this week</h3>
+      <div class="table-scroll"><table>
+        <tr><th>Ask your AI</th><th>You get</th></tr>
+        <tr><td>"Organise my Drive media folder"</td><td>Two pictures to approve, then a library you can browse</td></tr>
+        <tr><td>"Transcribe last month's shoot"</td><td>Every clip searchable by what was said, cost quoted first</td></tr>
+        <tr><td>"Find the testimonial about pricing"</td><td>The actual file, found by content not filename</td></tr>
+      </table></div></div>
+  </div>
+</section>
+
+<!-- ====== VERDICT ====== -->
+<section id="verdict">
+  <h2>Verdict</h2>
+  <div class="hero" style="margin-bottom:0">
+    <div><div class="pill good" style="font-size:14px;padding:8px 18px"><span class="dot"></span>Safe to use</div></div>
+    <div class="body"><p style="margin:0;color:var(--ink-2);font-size:14px">
+      The two flags are both things you are choosing to do: it moves your files, and if you want
+      transcripts it sends audio to OpenAI. Neither can happen by accident — moving needs a named
+      approval against the exact plan you were shown, and transcribing quotes the dollar cost and
+      waits. Nothing in this skill deletes your files, reaches your credentials, or runs on a
+      schedule behind you. The one thing to watch is disk space: if your Drive is set to stream
+      files, transcribing a large library pulls it all down, and the skill warns you before it does.</p></div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer class="sr-foot" id="sr-brand">
+  <svg class="logo" viewBox="430 402 440 95" xmlns="http://www.w3.org/2000/svg" aria-label="Selr AI"><path fill="var(--sr)" d="M466.43,429.13h48.92v-24.47h-67.3c-8.91,0-16.13,7.22-16.13,16.13,0,5.23,2.54,10.14,6.8,13.16l27.71,19.65v-24.47Z"/><path fill="var(--sr)" d="M483.68,446.39v24.47h-49.91v24.47h68.29c8.91,0,16.13-7.22,16.13-16.14,0-5.23-2.54-10.14-6.8-13.16l-27.71-19.65Z"/><path fill="var(--ink)" d="M619.04,448.4c-3.69-1.57-8.46-3.13-14.34-4.7-4.23-1.1-7.54-2.1-9.93-3-2.39-.9-4.39-2.13-6-3.7-1.61-1.57-2.41-3.64-2.41-6.23,0-2.12.65-4.04,1.94-5.76,1.29-1.72,3.07-3.07,5.35-4.06,2.27-.98,4.86-1.47,7.76-1.47,4.78,0,8.68,1.29,11.7,3.88,3.02,2.59,4.88,5.96,5.58,10.11l13.05-2.7c-.63-4.39-2.25-8.29-4.88-11.7-2.63-3.41-6.1-6.07-10.41-7.99-4.31-1.92-9.17-2.88-14.58-2.88s-10.33,1.02-14.75,3.06c-4.43,2.04-7.9,4.82-10.4,8.35-2.51,3.53-3.76,7.49-3.76,11.87,0,5.25,1.29,9.46,3.88,12.64,2.59,3.17,5.68,5.53,9.29,7.05,3.6,1.53,8.31,3.04,14.11,4.53,4.31,1.17,7.74,2.25,10.29,3.23,2.54.98,4.64,2.31,6.29,4,1.65,1.69,2.47,3.9,2.47,6.64,0,2.27-.7,4.31-2.12,6.11-1.41,1.8-3.37,3.23-5.88,4.29-2.51,1.06-5.37,1.59-8.58,1.59-5.33,0-9.58-1.21-12.76-3.64-3.17-2.43-5.15-5.88-5.94-10.35l-13.05,2.7c1.02,6.9,4.35,12.38,9.99,16.46,5.64,4.08,12.77,6.11,21.4,6.11,5.64,0,10.78-1.02,15.4-3.06,4.62-2.04,8.27-4.86,10.93-8.46,2.66-3.6,4-7.64,4-12.11,0-5.64-1.35-10.13-4.06-13.46-2.7-3.33-5.9-5.78-9.58-7.35"/><path fill="var(--ink)" d="M684.58,435.17c-4.98-3.17-10.64-4.76-16.99-4.76-5.8,0-11.09,1.37-15.87,4.11-4.78,2.74-8.54,6.51-11.29,11.29-2.75,4.78-4.11,10.07-4.11,15.87s1.39,11.07,4.17,15.81c2.78,4.74,6.6,8.48,11.46,11.23,4.86,2.75,10.27,4.11,16.22,4.11,6.35,0,12.01-1.53,16.99-4.59,4.98-3.06,8.8-7.13,11.46-12.23l-10.35-4.59c-1.72,3.37-4.13,6-7.23,7.88-3.1,1.88-6.6,2.82-10.52,2.82s-7.29-.9-10.35-2.7c-3.06-1.8-5.45-4.25-7.17-7.35-1.09-1.95-1.83-4.05-2.23-6.29h49.73c.7-6.43-.2-12.34-2.7-17.75-2.51-5.41-6.25-9.7-11.23-12.87M657.89,443.81c2.94-1.8,6.17-2.7,9.7-2.7s6.7.82,9.52,2.47c2.82,1.65,5.07,3.92,6.76,6.82,1.05,1.8,1.8,3.72,2.25,5.76h-37.06c.42-1.73,1.05-3.38,1.89-4.94,1.68-3.13,4-5.6,6.94-7.41"/><rect fill="var(--ink)" x="704.5" y="404.66" width="12.34" height="87"/><path fill="var(--ink)" d="M750,431.29c-3.37,1.06-6.27,3.35-8.7,6.88-1.7,2.47-3.07,5.6-4.11,9.38v-15.96h-12.34v60.08h12.34v-33.98c0-3.76,1.04-7,3.11-9.7,2.08-2.7,4.92-4.53,8.52-5.47,3.6-.94,7.52-.82,11.76.35v-11.76c-3.68-.94-7.21-.88-10.58.18"/><path fill="var(--ink)" d="M810.24,409.36l-35.74,82.3h9.41l9.47-21.98h43.13l9.47,21.98h9.64l-35.62-82.3h-9.76ZM796.93,461.44l18.02-41.82,18.02,41.82h-36.04Z"/><rect fill="var(--ink)" x="859.03" y="409.36" width="9.05" height="82.3"/></svg>
+  <span><b>Made by Selr AI</b> · Skill install report · generated 29 Jul 2026 ·
+  every file in this skill was read in full before this report was written.</span>
+</footer>
+
+</div><!-- /wrap -->
+</div><!-- /viz-root -->
+
+<script>
+// Theme toggle
+(function(){
+  var btn=document.getElementById('themeBtn'),root=document.documentElement;
+  function label(){var d=root.getAttribute('data-theme')==='dark'||
+    (!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);
+    btn.textContent=d?'Light mode':'Dark mode';}
+  btn.addEventListener('click',function(){
+    var d=root.getAttribute('data-theme')==='dark'||
+      (!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);
+    root.setAttribute('data-theme',d?'light':'dark');label();});
+  label();
+})();
+// Brand integrity guard — this report is issued by Selr AI; if the
+// attribution footer is removed the page restores it. Plain code, no tricks.
+(function(){
+  var HTML='<svg class="logo" viewBox="430 402 440 95" xmlns="http://www.w3.org/2000/svg" aria-label="Selr AI"><path fill="var(--sr)" d="M466.43,429.13h48.92v-24.47h-67.3c-8.91,0-16.13,7.22-16.13,16.13,0,5.23,2.54,10.14,6.8,13.16l27.71,19.65v-24.47Z"/><path fill="var(--sr)" d="M483.68,446.39v24.47h-49.91v24.47h68.29c8.91,0,16.13-7.22,16.13-16.14,0-5.23-2.54-10.14-6.8-13.16l-27.71-19.65Z"/><path fill="var(--ink)" d="M619.04,448.4c-3.69-1.57-8.46-3.13-14.34-4.7-4.23-1.1-7.54-2.1-9.93-3-2.39-.9-4.39-2.13-6-3.7-1.61-1.57-2.41-3.64-2.41-6.23,0-2.12.65-4.04,1.94-5.76,1.29-1.72,3.07-3.07,5.35-4.06,2.27-.98,4.86-1.47,7.76-1.47,4.78,0,8.68,1.29,11.7,3.88,3.02,2.59,4.88,5.96,5.58,10.11l13.05-2.7c-.63-4.39-2.25-8.29-4.88-11.7-2.63-3.41-6.1-6.07-10.41-7.99-4.31-1.92-9.17-2.88-14.58-2.88s-10.33,1.02-14.75,3.06c-4.43,2.04-7.9,4.82-10.4,8.35-2.51,3.53-3.76,7.49-3.76,11.87,0,5.25,1.29,9.46,3.88,12.64,2.59,3.17,5.68,5.53,9.29,7.05,3.6,1.53,8.31,3.04,14.11,4.53,4.31,1.17,7.74,2.25,10.29,3.23,2.54.98,4.64,2.31,6.29,4,1.65,1.69,2.47,3.9,2.47,6.64,0,2.27-.7,4.31-2.12,6.11-1.41,1.8-3.37,3.23-5.88,4.29-2.51,1.06-5.37,1.59-8.58,1.59-5.33,0-9.58-1.21-12.76-3.64-3.17-2.43-5.15-5.88-5.94-10.35l-13.05,2.7c1.02,6.9,4.35,12.38,9.99,16.46,5.64,4.08,12.77,6.11,21.4,6.11,5.64,0,10.78-1.02,15.4-3.06,4.62-2.04,8.27-4.86,10.93-8.46,2.66-3.6,4-7.64,4-12.11,0-5.64-1.35-10.13-4.06-13.46-2.7-3.33-5.9-5.78-9.58-7.35"/><path fill="var(--ink)" d="M684.58,435.17c-4.98-3.17-10.64-4.76-16.99-4.76-5.8,0-11.09,1.37-15.87,4.11-4.78,2.74-8.54,6.51-11.29,11.29-2.75,4.78-4.11,10.07-4.11,15.87s1.39,11.07,4.17,15.81c2.78,4.74,6.6,8.48,11.46,11.23,4.86,2.75,10.27,4.11,16.22,4.11,6.35,0,12.01-1.53,16.99-4.59,4.98-3.06,8.8-7.13,11.46-12.23l-10.35-4.59c-1.72,3.37-4.13,6-7.23,7.88-3.1,1.88-6.6,2.82-10.52,2.82s-7.29-.9-10.35-2.7c-3.06-1.8-5.45-4.25-7.17-7.35-1.09-1.95-1.83-4.05-2.23-6.29h49.73c.7-6.43-.2-12.34-2.7-17.75-2.51-5.41-6.25-9.7-11.23-12.87M657.89,443.81c2.94-1.8,6.17-2.7,9.7-2.7s6.7.82,9.52,2.47c2.82,1.65,5.07,3.92,6.76,6.82,1.05,1.8,1.8,3.72,2.25,5.76h-37.06c.42-1.73,1.05-3.38,1.89-4.94,1.68-3.13,4-5.6,6.94-7.41"/><rect fill="var(--ink)" x="704.5" y="404.66" width="12.34" height="87"/><path fill="var(--ink)" d="M750,431.29c-3.37,1.06-6.27,3.35-8.7,6.88-1.7,2.47-3.07,5.6-4.11,9.38v-15.96h-12.34v60.08h12.34v-33.98c0-3.76,1.04-7,3.11-9.7,2.08-2.7,4.92-4.53,8.52-5.47,3.6-.94,7.52-.82,11.76.35v-11.76c-3.68-.94-7.21-.88-10.58.18"/><path fill="var(--ink)" d="M810.24,409.36l-35.74,82.3h9.41l9.47-21.98h43.13l9.47,21.98h9.64l-35.62-82.3h-9.76ZM796.93,461.44l18.02-41.82,18.02,41.82h-36.04Z"/><rect fill="var(--ink)" x="859.03" y="409.36" width="9.05" height="82.3"/></svg><span><b>Made by Selr AI</b> · Skill install report</span>';
+  function ensure(){
+    if(!document.getElementById('sr-brand')){
+      var f=document.createElement('footer');
+      f.className='sr-foot';f.id='sr-brand';f.innerHTML=HTML;
+      (document.querySelector('.wrap')||document.body).appendChild(f);
+    }
+  }
+  ensure();
+  new MutationObserver(ensure).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+</body><!-- srk:j90znf --></html>
