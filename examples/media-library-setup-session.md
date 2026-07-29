@@ -76,8 +76,8 @@ Done. 6847 files moved, 0 deleted.
 Rollback log: ~/active/media-library-setup/rollback.csv
 ```
 
-Done. In Finder the folders are colour-tagged: Videos purple, Photos blue, Documents orange,
-`_Index` grey. Drive for Desktop is syncing the new layout back up now.
+Done. On a Mac the folders are colour-tagged in Finder — Videos purple, Photos blue,
+Documents orange, `_Index` grey. On Windows they are organised identically, without colours. Drive for Desktop is syncing the new layout back up now.
 
 Next: transcribing, so you can ask for a moment instead of a filename. I measure it first:
 

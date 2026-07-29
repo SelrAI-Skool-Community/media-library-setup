@@ -16,6 +16,8 @@ import tempfile
 
 root = pathlib.Path(sys.argv[1])
 skill = (root / "SKILL.md").read_text()
+setup_prompt = (root / "SETUP-PROMPT.md").read_text()
+readme = (root / "README.md").read_text() if (root / "README.md").exists() else ""
 rules = (root / "references" / "structure-rules.md").read_text()
 both = skill + rules
 
@@ -139,6 +141,16 @@ checks = {
     "self-heals rather than escalating": "self-heal" in skill.lower(),
     "publishing firewall: no names or contacts": not any(b in both for b in BANNED),
 }
+
+# The install prompt quotes the number of checks. If that number goes stale, the very
+# first thing a member runs looks broken. Assert the docs match what actually prints.
+import re as _re
+_docs = [("SETUP-PROMPT.md", setup_prompt), ("README.md", readme)]
+_quoted = [(lbl, int(n)) for lbl, d in _docs
+           for n in _re.findall(r"ok: (\d+) media-library-setup contract checks", d)]
+TOTAL = len(checks) + len(_quoted)
+for lbl, n in _quoted:
+    checks[f"{lbl} quotes the real check count"] = (n == TOTAL)
 
 failed = [name for name, ok in checks.items() if not ok]
 if failed:

@@ -7,10 +7,10 @@ Install the media-library-setup skill for me.
 
 1. Confirm SKILL.md exists at ~/.claude/skills/media-library-setup/SKILL.md
 2. Run the offline check: bash ~/.claude/skills/media-library-setup/scripts/smoke.sh
-   It should print "ok: 19 media-library-setup contract checks".
-3. Read ~/.claude/skills/media-library-setup/references/setup.md and walk me through
-   the three installs: Google Drive for Desktop, ffmpeg, and an OpenAI key.
-   Check each one before moving to the next.
+   It should print "ok: 40 media-library-setup contract checks".
+3. Run: python3 ~/.claude/skills/media-library-setup/scripts/library.py check
+   It tells you what is already on my computer and what is missing. Walk me through
+   installing anything it lists, one at a time, checking each before the next.
 4. Then tell me in three lines what folder structure you are going to propose and why
    it stays flat.
 
@@ -26,11 +26,13 @@ It scans, plans, and shows you two pictures of the proposed structure **before**
 anything. Files move only after you say yes, nothing is ever deleted, and every move is written
 to a rollback file first.
 
+Works on **Mac and Windows**.
+
 ## What you need
 
 - **Google Drive for Desktop** — https://www.google.com/drive/download/
   Makes your Drive a normal folder on your computer. No API, no developer account.
-- **ffmpeg** — `brew install ffmpeg` on a Mac
+- **ffmpeg** — `brew install ffmpeg` (Mac), `winget install ffmpeg` (Windows)
 - **An OpenAI key** — https://platform.openai.com/api-keys
   Only for transcription. About **$0.36 per hour of video**, billed to your own account.
   You are shown the exact cost before anything is sent. $5 goes a long way.

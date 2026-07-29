@@ -30,9 +30,7 @@ is, and warns if it is tight. If it is, do one event folder at a time — point 
 one folder instead of the whole library. Drive normally clears its cache as it goes, but on a
 nearly full disk do not rely on it.
 
-**Check it worked.** The folder appears at:
-
-`check` finds it for you and prints the path. If you want to look yourself:
+**Check it worked.** `check` finds it for you and prints the path. If you want to look yourself:
 
 - **Mac** — `~/Library/CloudStorage/GoogleDrive-<their-email>`, or `~/Google Drive` on older installs
 - **Windows** — a drive letter, usually `G:\My Drive`
