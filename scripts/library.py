@@ -63,9 +63,15 @@ def use_library(root: Path) -> Path:
     return WORK
 
 
-def current_library() -> Path:
-    """Resume the library the last scan pointed at."""
+def current_library(pin: str | None = None) -> Path:
+    """Resume a library. `pin` selects one explicitly instead of the last scanned."""
     global WORK
+    if pin:
+        root = Path(pin).expanduser().resolve()
+        WORK = WORK_BASE / library_slug(root)
+        if not (WORK / "scan.json").exists():
+            raise SystemExit(f"'{root}' has not been scanned. Run:  library.py scan \"{root}\"")
+        return WORK
     ptr = WORK_BASE / "current.json"
     if not ptr.exists():
         raise SystemExit("No library scanned yet. Run:  library.py scan \"<your folder>\"")
@@ -190,8 +196,8 @@ def plan_digest(plan: dict) -> str:
     payload = json.dumps({
         "root": plan.get("root"),
         "group_by": plan.get("group_by"),
-        "moves": [[m["path"], m["to"], m.get("final_name", m["name"])]
-                  for m in plan.get("moves", [])],
+        "moves": [[m["path"], m["from"], m["name"], m["to"],
+                   m.get("final_name", m["name"])] for m in plan.get("moves", [])],
     }, sort_keys=True)
     return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
@@ -362,6 +368,10 @@ def cmd_scan(args) -> None:
             "if your Drive is still syncing, the files may not be here yet.")
 
     (WORK / "scan.json").write_text(json.dumps(scan, indent=2))
+    # A fresh scan invalidates any plan built from the previous one — otherwise an
+    # already-approved plan could execute against files that have since changed.
+    for stale in ("plan.json", "1-folder-structure.html", "2-where-things-are-stored.html"):
+        (WORK / stale).unlink(missing_ok=True)
 
     t = scan["totals"]
     print(f"Scanned '{root.name}' — read only, nothing changed.")
@@ -419,7 +429,7 @@ def cmd_plan(args) -> None:
         if group_by == "flat":
             event = ""
         else:
-            event = (f["parent_path"].split("/")[0]
+            event = (re.split(r"[\\/]", f["parent_path"])[0]
                      if f["parent_path"] != "." else "Unsorted")
         dest = f"{event}/{f['category']}" if event else f["category"]
         moves.append({"path": f["path"], "name": f["name"], "from": f["parent_path"],
@@ -427,19 +437,24 @@ def cmd_plan(args) -> None:
 
     # Same name landing in the same folder gets a -2 suffix. Decide that HERE so it
     # appears in the plan and the visuals, not silently inside apply after approval.
-    seen: dict[tuple[str, str], int] = {}
+    taken: dict[str, set[str]] = {}
     renames: list[dict] = []
     for m in moves:
-        key = (m["to"], m["name"])
-        seen[key] = seen.get(key, 0) + 1
-        if seen[key] > 1:
-            stem, _, ext = m["name"].rpartition(".")
+        here = taken.setdefault(m["to"], set())
+        name = m["name"]
+        if name in here:
+            stem, _, ext = name.rpartition(".")
             ext = f".{ext}" if stem else ""
-            stem = stem or m["name"]
-            m["final_name"] = f"{stem}-{seen[key]}{ext}"
-            renames.append({"from": m["path"], "to": f"{m['to']}/{m['final_name']}"})
-        else:
-            m["final_name"] = m["name"]
+            stem = stem or name
+            n = 2
+            # Skip any suffix already claimed by a real file heading to the same
+            # folder, or apply would silently invent a different name than approved.
+            while f"{stem}-{n}{ext}" in here:
+                n += 1
+            name = f"{stem}-{n}{ext}"
+            renames.append({"from": m["path"], "to": f"{m['to']}/{name}"})
+        here.add(name)
+        m["final_name"] = name
 
     dests = sorted({m["to"] for m in moves})
     already = sum(1 for m in moves if m["from"] == m["to"])
@@ -525,7 +540,8 @@ def cmd_visualise(args) -> None:
     # it — promising to remove folders apply never touches was a lie four agents caught.
     from_dirs = Counter(m["from"] for m in plan["moves"])
     leaving = Counter(m["from"] for m in plan["moves"] if m["from"] != m["to"])
-    dest_parents = {d.rsplit("/", 1)[0] for d in plan["per_destination"] if "/" in d}
+    dest_parents = {re.split(r"[\\/]", d)[0] for d in plan["per_destination"]
+                    if re.search(r"[\\/]", d)}
     will_clear = sum(1 for d, n in from_dirs.items()
                      if d != "." and leaving.get(d, 0) == n and d not in dest_parents)
 
@@ -699,7 +715,7 @@ completely empty afterwards are tidied away; anything still holding a file is le
 # ---------------------------------------------------------------- apply
 
 def cmd_apply(args) -> None:
-    current_library()
+    current_library(getattr(args, "library", None))
     plan_path = WORK / "plan.json"
     if not plan_path.exists():
         raise SystemExit("No plan.json. Run scan, plan and visualise first.")
@@ -733,6 +749,7 @@ def cmd_apply(args) -> None:
         raise SystemExit(
             "Every file is already where it should be. There is nothing to move,\n"
             "so there is nothing to approve. This library is already organised.")
+    print(f"About to change:  {root}")
     print(f"Applying: {len(todo)} files to move. Nothing will be deleted.")
 
     made: set[str] = set()
@@ -768,7 +785,12 @@ def cmd_apply(args) -> None:
             # Never overwrite. Compare the paths themselves, not their resolved
             # targets — a symlink pointing AT the destination resolves equal to it,
             # which would skip the guard and clobber the real file.
-            if (dest.exists() or dest.is_symlink()) and dest != src:
+            same_file = False
+            try:
+                same_file = dest.exists() and src.exists() and dest.samefile(src)
+            except OSError:
+                pass
+            if (dest.exists() or dest.is_symlink()) and dest != src and not same_file:
                 stem, ext, n = dest.stem, dest.suffix, 2
                 while dest.exists() or dest.is_symlink():
                     dest = dest_dir / f"{stem}-{n}{ext}"
@@ -783,6 +805,7 @@ def cmd_apply(args) -> None:
             w.writerow([m["name"], dest.name, m["from"], m["to"],
                         datetime.now().isoformat(timespec="seconds")])
             fh.flush()
+            os.fsync(fh.fileno())   # survive a power loss, not just a crash
             emptied.add((root / m["from"]) if m["from"] != "." else root)
             moved += 1
 
@@ -837,7 +860,7 @@ def cmd_rollback(args) -> None:
     fleet went looking for it and found only a CSV they were expected to
     reverse by hand.
     """
-    current_library()
+    current_library(getattr(args, "library", None))
     log_path = WORK / "rollback.csv"
     if not log_path.exists():
         raise SystemExit("Nothing to undo — this library has never been changed.")
@@ -865,6 +888,7 @@ def cmd_rollback(args) -> None:
 
     restored = failed = 0
     problems: list[str] = []
+    unfinished: set[str] = set()
     # Newest first, so a file moved twice lands back at its true origin.
     for r in reversed(rows):
         src = root / r["moved_to"] / r["final_name"]
@@ -872,6 +896,7 @@ def cmd_rollback(args) -> None:
         dest = dest_dir / r["original_name"]
         if not src.exists():
             problems.append(f"{r['final_name']} is not where the log says it is")
+            unfinished.add(r["final_name"])
             failed += 1
             continue
         try:
@@ -885,7 +910,19 @@ def cmd_rollback(args) -> None:
             restored += 1
         except Exception as e:
             problems.append(f"{r['final_name']}: {type(e).__name__}")
+            unfinished.add(r["final_name"])
             failed += 1
+
+    # apply corrects a folder's casing (a member's `videos` becomes `Videos`), so the
+    # undo has to put the original casing back too or the library is not truly as it was.
+    # Every component, outermost first — force_case only fixes the last one, and the
+    # parent (`videos`) is exactly the folder apply renamed.
+    for original in sorted({r["moved_from"] for r in rows if r["moved_from"] != "."}):
+        parts = re.split(r"[\\/]", original)
+        for i in range(1, len(parts) + 1):
+            d = root.joinpath(*parts[:i])
+            if d.is_dir():
+                force_case(d)
 
     # Clear the folders the undo emptied — same rule as apply: only truly empty.
     removed = 0
@@ -898,20 +935,37 @@ def cmd_rollback(args) -> None:
             except OSError:
                 break
 
-    log_path.rename(WORK / f"rollback-undone-{datetime.now():%Y%m%d-%H%M%S}.csv")
-    plan["approved"] = False
-    plan["rolled_back_at"] = datetime.now().isoformat(timespec="seconds")
-    plan.pop("shown_digest", None)
+    if problems:
+        # Keep the rows that did NOT come back, so running rollback again retries
+        # exactly those and status still reports work outstanding.
+        with log_path.open("w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(rows[0]))
+            w.writeheader()
+            w.writerows([r for r in rows if r["final_name"] in unfinished])
+        plan["approved"] = True          # still partly organised
+        plan["partial_rollback_at"] = datetime.now().isoformat(timespec="seconds")
+    else:
+        log_path.rename(WORK / f"rollback-undone-{datetime.now():%Y%m%d-%H%M%S}.csv")
+        plan["approved"] = False
+        plan["rolled_back_at"] = datetime.now().isoformat(timespec="seconds")
+        plan.pop("shown_digest", None)
     (WORK / "plan.json").write_text(json.dumps(plan, indent=2))
 
     print(f"\nDone. {restored} files put back, 0 deleted.")
     if removed:
         print(f"  {removed} folders that ended up empty were cleared.")
     if problems:
-        print(f"  {failed} could not be moved back:")
+        print(f"\n  {failed} could not be moved back — they are still where they are, "
+              f"nothing was lost:")
         for x in problems[:10]:
             print(f"    {x}")
-    print("The library is back to how it was. You can scan it again any time.")
+        if len(problems) > 10:
+            print(f"    …and {len(problems) - 10} more")
+        print("\n  Everything else is back where it started. The ones above were moved or"
+              "\n  renamed after the organise, so the undo could not find them — look for"
+              "\n  them by name and put them back by hand.")
+    else:
+        print("The library is back to how it was. You can scan it again any time.")
 
 
 # ---------------------------------------------------------------- status
@@ -931,6 +985,9 @@ def cmd_status(args) -> None:
         c = plan["counts"]
         if plan.get("approved"):
             state = "organised — undo is available"
+        elif plan.get("partial_rollback_at"):
+            state = ("partly put back — some files could not be found. "
+                     "Run rollback again to retry them")
         elif plan.get("rolled_back_at"):
             state = ("put back the way it was on "
                      f"{plan['rolled_back_at'][:10]} — nothing pending")
@@ -1140,10 +1197,14 @@ def main() -> None:
 
     a = sub.add_parser("apply", help="move the files — needs approval")
     a.add_argument("--approved-by", default="")
+    a.add_argument("--library", default=None,
+                   help="pin the library by path instead of the last one scanned")
     a.set_defaults(func=cmd_apply)
 
     rb = sub.add_parser("rollback", help="put every moved file back where it was")
     rb.add_argument("--approved-by", default="")
+    rb.add_argument("--library", default=None,
+                    help="pin the library by path instead of the last one scanned")
     rb.set_defaults(func=cmd_rollback)
 
     st = sub.add_parser("status", help="which library is active and what state it is in")

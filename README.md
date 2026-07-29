@@ -44,13 +44,23 @@ Your Library/
 
 > find the bit where someone talks about pricing
 
+**Changed your mind at any point?** "Put my library back the way it was" — it restores every
+file to its original folder under its original name.
+
 ---
 
 ## The two promises
 
 - **Nothing changes until you approve it.** You see the exact plan first, as pictures.
-- **Nothing is ever deleted.** Files move, every move is written to an undo file, and the whole
-  thing can be put back.
+- **No file is ever deleted, and it can all be undone.** Files move, every move is written down,
+  and one command puts the whole thing back exactly as it was:
+
+  ```
+  Put my library back the way it was
+  ```
+
+  Folders left completely empty afterwards are tidied away; anything still holding a file is
+  left alone.
 
 ---
 
@@ -75,7 +85,7 @@ Install the media-library-setup skill for me.
 
 1. Confirm SKILL.md exists at ~/.claude/skills/media-library-setup/SKILL.md
 2. Run: bash ~/.claude/skills/media-library-setup/scripts/smoke.sh
-   It should print "ok: 62 media-library-setup contract checks".
+   It should print "ok: 74 media-library-setup contract checks".
 3. Run: python3 ~/.claude/skills/media-library-setup/scripts/library.py check
    Then walk me through installing anything it says is missing.
 

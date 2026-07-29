@@ -7,7 +7,7 @@ Install the media-library-setup skill for me.
 
 1. Confirm SKILL.md exists at ~/.claude/skills/media-library-setup/SKILL.md
 2. Run the offline check: bash ~/.claude/skills/media-library-setup/scripts/smoke.sh
-   It should print "ok: 62 media-library-setup contract checks".
+   It should print "ok: 74 media-library-setup contract checks".
 3. Run: python3 ~/.claude/skills/media-library-setup/scripts/library.py check
    It tells you what is already on my computer and what is missing. Walk me through
    installing anything it lists, one at a time, checking each before the next.

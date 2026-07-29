@@ -1,5 +1,40 @@
 # media-library-setup Changelog
 
+## 0.8.0 — 2026-07-29
+
+Independent review of the rollback and per-library code, none of which existed when
+the last review ran. 12 findings, every one traced and reproduced before fixing.
+
+Two were serious, and both were introduced the same day:
+
+- **A partial undo destroyed its own retry path.** If one file could not be found — because
+  the owner had moved or renamed it — the whole log was archived anyway. The files that did
+  not come back could never be retried, and `status` reported "nothing pending". The rows that
+  fail now stay live, `status` says the undo is only partly done, and running it again picks up
+  exactly those files.
+- **An approval could land on the wrong library.** Scanning a second library silently made it
+  the current one, so an approval given for library A would move library B. `apply` and
+  `rollback` now print the full path of the library they are about to change, and take
+  `--library` to pin it explicitly.
+
+The rest, all confirmed by tracing:
+
+- A generated `-2` name could collide with a real file already called that, so apply quietly
+  used `-2-2` and executed something the owner never approved. Collision names now skip any
+  name already claimed.
+- Correcting a folder's case (`videos` to `Videos`) made a file look like a collision with
+  itself and renamed it `-2`. Guarded with a same-file check.
+- Undo restored files correctly but left the folder casing apply had changed, so a library was
+  not truly back as it was. Every path component is now restored.
+- A fresh scan left an already-approved plan valid, so apply could run against files that had
+  changed underneath it. Scanning now clears the old plan and visuals.
+- The approval fingerprint ignored the source folder and original filename, so editing either
+  would pass. Both are covered now.
+- Windows paths were split on forward slashes only, putting event folders one level too deep.
+- The move log is fsynced, so a power cut cannot leave a moved file with no way back.
+
+63 -> 74 contract checks.
+
 ## 0.7.0 — 2026-07-29
 
 Third stress-fleet round, 8 agents attacking the new undo. It held — multiple agents

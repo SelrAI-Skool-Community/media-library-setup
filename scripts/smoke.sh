@@ -168,6 +168,19 @@ checks = {
     "renames are decided at plan time, before approval": '"renames"' in src
                                                          and 'm["final_name"]' in src,
     "apply uses the name the plan showed": 'm.get("final_name", m["name"])' in src,
+    "partial undo does not claim full success": 'else:\n        print("The library is back' in src,
+    # --- 2026-07-29 independent review of the rollback / per-library code
+    "partial undo keeps failed rows retryable": "unfinished" in src,
+    "status distinguishes a partial undo": "partial_rollback_at" in src,
+    "apply names the library it will change": "About to change:" in src,
+    "library can be pinned explicitly": '"--library"' in src and "def current_library(pin" in src,
+    "collision names skip ones already taken": "already claimed by a real file" in src,
+    "case correction does not fake a collision": "samefile(src)" in src,
+    "paths split on both separators": 're.split(r"[\\\\/]"' in src,
+    "a fresh scan invalidates the old plan": "A fresh scan invalidates any plan" in src,
+    "the log survives power loss": "os.fsync(fh.fileno())" in src,
+    "undo restores original folder casing": "Every component, outermost first" in src,
+    "digest covers source folder and original name": 'm["from"], m["name"], m["to"]' in src,
     "approval digest covers renames too": 'm.get("final_name", m["name"])] ' in src
                                           or 'final_name", m["name"])\n' in src,
 }
