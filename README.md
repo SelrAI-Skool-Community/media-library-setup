@@ -78,7 +78,16 @@ until you confirm. Each video is only ever paid for once.
 
 ## Install
 
-Drop the `media-library-setup` folder into `~/.claude/skills/`, then paste this into Claude Code:
+Get the folder onto your computer, either way:
+
+```bash
+git clone https://github.com/luke-heka/media-library-setup.git ~/.claude/skills/media-library-setup
+```
+
+Or click the green **Code** button above → **Download ZIP**, unzip it, and move the
+`media-library-setup` folder into `~/.claude/skills/`.
+
+Then paste this into Claude Code:
 
 ```
 Install the media-library-setup skill for me.
