@@ -84,8 +84,8 @@ Get the folder onto your computer, either way:
 git clone https://github.com/luke-heka/media-library-setup.git ~/.claude/skills/media-library-setup
 ```
 
-Or click the green **Code** button above → **Download ZIP**, unzip it, and move the
-`media-library-setup` folder into `~/.claude/skills/`.
+Not using git? Use the green **Code** button at the top of this page to download the folder,
+then move `media-library-setup` into `~/.claude/skills/`.
 
 Then paste this into Claude Code:
 
