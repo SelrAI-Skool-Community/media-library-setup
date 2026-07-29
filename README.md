@@ -75,7 +75,7 @@ Install the media-library-setup skill for me.
 
 1. Confirm SKILL.md exists at ~/.claude/skills/media-library-setup/SKILL.md
 2. Run: bash ~/.claude/skills/media-library-setup/scripts/smoke.sh
-   It should print "ok: 40 media-library-setup contract checks".
+   It should print "ok: 62 media-library-setup contract checks".
 3. Run: python3 ~/.claude/skills/media-library-setup/scripts/library.py check
    Then walk me through installing anything it says is missing.
 

@@ -13,6 +13,8 @@ Six commands, run in order:
     library.py visualise                     read-only. Writes 2 HTML visuals
     library.py apply --approved-by "<who>"   moves files. Nothing is deleted
     library.py transcribe                    makes it searchable (costs a few dollars)
+    library.py rollback                      puts every moved file back where it was
+    library.py status                        which library is active, what state it is in
 
 `apply` refuses to run unless a plan exists, the visuals were generated, and a person
 is named. Every move is written to rollback.csv before it happens.
@@ -26,6 +28,7 @@ import html
 import json
 import os
 import plistlib
+import re
 import shutil
 import subprocess
 import sys
@@ -33,7 +36,43 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-WORK = Path.home() / "active" / "media-library-setup"
+# Every library gets its OWN state folder, keyed by the folder being organised.
+# One shared folder meant scanning a second library silently overwrote the first
+# library's plan and mixed both libraries into one rollback log — every agent in
+# the 2026-07-29 stress fleet hit this. MEDIA_LIBRARY_WORK_DIR overrides the base.
+WORK_BASE = Path(os.environ.get("MEDIA_LIBRARY_WORK_DIR",
+                                Path.home() / "active" / "media-library-setup"))
+WORK = WORK_BASE          # replaced per-library by use_library() / current_library()
+
+
+def library_slug(root: Path) -> str:
+    """Stable, readable folder name for one library's state."""
+    tag = hashlib.sha256(str(root).encode()).hexdigest()[:8]
+    name = re.sub(r"[^A-Za-z0-9]+", "-", root.name).strip("-").lower() or "library"
+    return f"{name}-{tag}"
+
+
+def use_library(root: Path) -> Path:
+    """Point state at this library and remember it as the current one."""
+    global WORK
+    WORK = WORK_BASE / library_slug(root)
+    WORK.mkdir(parents=True, exist_ok=True)
+    WORK_BASE.mkdir(parents=True, exist_ok=True)
+    (WORK_BASE / "current.json").write_text(json.dumps(
+        {"root": str(root), "slug": library_slug(root)}, indent=2))
+    return WORK
+
+
+def current_library() -> Path:
+    """Resume the library the last scan pointed at."""
+    global WORK
+    ptr = WORK_BASE / "current.json"
+    if not ptr.exists():
+        raise SystemExit("No library scanned yet. Run:  library.py scan \"<your folder>\"")
+    WORK = WORK_BASE / json.loads(ptr.read_text())["slug"]
+    if not (WORK / "scan.json").exists():
+        raise SystemExit("That library's scan is missing. Run scan again.")
+    return WORK
 
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm", ".mpg", ".mpeg", ".wmv"}
 PHOTO_EXTS = {".jpg", ".jpeg", ".png", ".heic", ".gif", ".webp", ".tif", ".tiff",
@@ -151,7 +190,8 @@ def plan_digest(plan: dict) -> str:
     payload = json.dumps({
         "root": plan.get("root"),
         "group_by": plan.get("group_by"),
-        "moves": [[m["path"], m["to"]] for m in plan.get("moves", [])],
+        "moves": [[m["path"], m["to"], m.get("final_name", m["name"])]
+                  for m in plan.get("moves", [])],
     }, sort_keys=True)
     return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
@@ -198,7 +238,8 @@ def cmd_check(args) -> None:
     else:
         todo.append((
             "Google Drive is not on this computer yet",
-            "This is the one that matters — it puts your Drive here as a normal folder.",
+            "Only needed if your media lives in Google Drive — it puts your Drive here as a\n"
+            "    normal folder. If your files are already on this computer, skip this.",
             "Install it from https://www.google.com/drive/download/ , sign in, and pick\n"
             '    "Stream files" when it asks. Then wait for the first sync to finish.'))
 
@@ -254,8 +295,15 @@ def cmd_check(args) -> None:
         print(f"  {i}. {what}")
         print(f"     {why}")
         print("     " + how.replace("\n    ", "\n     ") + "\n")
-    print("None of this is urgent — organising your folders needs only the first one.")
-    print("Transcribing needs the rest. Run this check again after each step.")
+    need_drive = any("Google Drive" in w for w, _, _ in todo)
+    if need_drive:
+        print("If your media is already on this computer, you can start right now — organising")
+        print("is free and needs nothing installed. Google Drive above is only for pulling a")
+        print("Drive down as a folder. The rest is only for searchable transcripts later.")
+    else:
+        print("You have everything you need to organise your folders — that part is free.")
+        print("The items above are only for the optional searchable-transcripts step.")
+    print("Run this check again after each step.")
 
 
 # ---------------------------------------------------------------- scan
@@ -264,7 +312,7 @@ def cmd_scan(args) -> None:
     root = Path(args.folder).expanduser().resolve()
     if not root.is_dir():
         raise SystemExit(f"Not a folder: {root}")
-    WORK.mkdir(parents=True, exist_ok=True)
+    use_library(root)
 
     files, folders = [], []
     for dirpath, dirnames, filenames in os.walk(root):
@@ -307,6 +355,12 @@ def cmd_scan(args) -> None:
         "folders": folders,
         "files": files,
     }
+    if not files:
+        raise SystemExit(
+            f"'{root.name}' has no photos, videos or documents in it.\n"
+            "There is nothing to organise. Check you pointed at the right folder —\n"
+            "if your Drive is still syncing, the files may not be here yet.")
+
     (WORK / "scan.json").write_text(json.dumps(scan, indent=2))
 
     t = scan["totals"]
@@ -346,12 +400,19 @@ def detect_shape(scan: dict) -> str:
 
 
 def cmd_plan(args) -> None:
+    current_library()
     scan = json.loads((WORK / "scan.json").read_text())
     group_by = args.group_by or detect_shape(scan)
     if not args.group_by:
-        why = ("its subfolders are already categories, so this is one shoot"
-               if group_by == "flat" else "its subfolders look like separate events")
-        print(f"Detected: {group_by} layout ({why}). Override with --group-by.")
+        level1 = [f for f in scan["folders"] if f["depth"] == 1]
+        if not level1:
+            why = "everything sits in one folder already"
+        elif group_by == "flat":
+            why = "its subfolders are already categories, so this is one shoot"
+        else:
+            why = "its subfolders look like separate events"
+        print(f"Treating this as {'one shoot' if group_by == 'flat' else 'a library of events'}"
+              f" — {why}. Override with --group-by.")
 
     moves = []
     for f in scan["files"]:
@@ -363,6 +424,22 @@ def cmd_plan(args) -> None:
         dest = f"{event}/{f['category']}" if event else f["category"]
         moves.append({"path": f["path"], "name": f["name"], "from": f["parent_path"],
                       "to": dest, "category": f["category"], "event": event})
+
+    # Same name landing in the same folder gets a -2 suffix. Decide that HERE so it
+    # appears in the plan and the visuals, not silently inside apply after approval.
+    seen: dict[tuple[str, str], int] = {}
+    renames: list[dict] = []
+    for m in moves:
+        key = (m["to"], m["name"])
+        seen[key] = seen.get(key, 0) + 1
+        if seen[key] > 1:
+            stem, _, ext = m["name"].rpartition(".")
+            ext = f".{ext}" if stem else ""
+            stem = stem or m["name"]
+            m["final_name"] = f"{stem}-{seen[key]}{ext}"
+            renames.append({"from": m["path"], "to": f"{m['to']}/{m['final_name']}"})
+        else:
+            m["final_name"] = m["name"]
 
     dests = sorted({m["to"] for m in moves})
     already = sum(1 for m in moves if m["from"] == m["to"])
@@ -382,6 +459,7 @@ def cmd_plan(args) -> None:
             "depth_after": 2 if group_by != "flat" else 1,
         },
         "per_destination": dict(Counter(m["to"] for m in moves)),
+        "renames": renames,
         "moves": moves,
         "approved": False,
     }
@@ -392,6 +470,13 @@ def cmd_plan(args) -> None:
     print(f"  {c['folders_before']} folders ({c['depth_before']} deep)"
           f"  ->  {c['folders_after']} folders ({c['depth_after']} deep)")
     print(f"  {c['files_moving']} files will move, {c['files_already_correct']} already correct")
+    if renames:
+        print(f"  {len(renames)} share a name with another file and get a number added "
+              f"so neither is lost:")
+        for r in renames[:5]:
+            print(f"    {Path(r['from']).name}  ->  {Path(r['to']).name}")
+        if len(renames) > 5:
+            print(f"    …and {len(renames) - 5} more")
     print("  Nothing is deleted. Every move is logged and reversible.")
     print(f"\nWrote {WORK / 'plan.json'}")
 
@@ -403,6 +488,7 @@ SWATCH = {"Videos": "#6736E2", "Photos": "#00A9A5",
 
 
 def cmd_visualise(args) -> None:
+    current_library()
     plan = json.loads((WORK / "plan.json").read_text())
     scan = json.loads((WORK / "scan.json").read_text())
     c = plan["counts"]
@@ -433,6 +519,20 @@ def cmd_visualise(args) -> None:
             for cat in CATEGORIES if n_of(cat)
         )
         return f'<div class="event"><h4>{ev or root_name}</h4><ul class="cats">{rows}</ul></div>'
+
+    # Only count folders this plan genuinely empties. A source folder does NOT clear
+    # if it still holds files afterwards, or if a destination folder is created inside
+    # it — promising to remove folders apply never touches was a lie four agents caught.
+    from_dirs = Counter(m["from"] for m in plan["moves"])
+    leaving = Counter(m["from"] for m in plan["moves"] if m["from"] != m["to"])
+    dest_parents = {d.rsplit("/", 1)[0] for d in plan["per_destination"] if "/" in d}
+    will_clear = sum(1 for d, n in from_dirs.items()
+                     if d != "." and leaving.get(d, 0) == n and d not in dest_parents)
+
+    n_ren = len(plan.get("renames", []))
+    rename_tile = (
+        f'<div class="stat"><b>{n_ren}</b><span>files renamed with a number, because another '
+        f'file shares their name. Neither is lost.</span></div>' if n_ren else "")
 
     SHOWN = 4
     after_blocks = "".join(event_block(e) for e in events[:SHOWN]) or event_block("")
@@ -499,10 +599,12 @@ def cmd_visualise(args) -> None:
   <div class="stat"><b>{c['files_total']}</b><span>files in the library</span></div>
   <div class="stat"><b>{c['files_moving']}</b><span>files that would move</span></div>
   <div class="stat"><b>0</b><span>files deleted, ever</span></div>
-  <div class="stat"><b>{scan['totals']['sparse_folders']}</b><span>near-empty folders removed</span></div>
+  <div class="stat"><b>{will_clear}</b><span>emptied folders cleared away</span></div>
+  {rename_tile}
 </div>
-<div class="safe"><b>Nothing is deleted.</b> Files are moved, never removed, and every single move
-is written to a rollback file first — so the whole thing can be put back exactly as it was.</div>
+<div class="safe"><b>No file is ever deleted.</b> Files are moved, never removed, and every move is
+written down first — one command puts the whole thing back exactly as it was. Folders that end up
+completely empty afterwards are tidied away; anything still holding a file is left alone.</div>
 """
 
     lanes = "".join(
@@ -597,6 +699,7 @@ is written to a rollback file first — so the whole thing can be put back exact
 # ---------------------------------------------------------------- apply
 
 def cmd_apply(args) -> None:
+    current_library()
     plan_path = WORK / "plan.json"
     if not plan_path.exists():
         raise SystemExit("No plan.json. Run scan, plan and visualise first.")
@@ -626,6 +729,10 @@ def cmd_apply(args) -> None:
 
     root = Path(plan["root"]["path"])
     todo = [m for m in plan["moves"] if m["from"] != m["to"]]
+    if not todo:
+        raise SystemExit(
+            "Every file is already where it should be. There is nothing to move,\n"
+            "so there is nothing to approve. This library is already organised.")
     print(f"Applying: {len(todo)} files to move. Nothing will be deleted.")
 
     made: set[str] = set()
@@ -639,7 +746,7 @@ def cmd_apply(args) -> None:
     with rb.open("a", newline="") as fh:
         w = csv.writer(fh)
         if new_file:
-            w.writerow(["name", "moved_from", "moved_to", "at"])
+            w.writerow(["original_name", "final_name", "moved_from", "moved_to", "at"])
         for m in todo:
             src = root / m["path"]
             if not src.exists() and not src.is_symlink():
@@ -656,7 +763,8 @@ def cmd_apply(args) -> None:
                     continue
                 made.add(m["to"])
                 print(f"  {m['to']}")
-            dest = dest_dir / m["name"]
+            # Use the name the PLAN showed and the owner approved.
+            dest = dest_dir / m.get("final_name", m["name"])
             # Never overwrite. Compare the paths themselves, not their resolved
             # targets — a symlink pointing AT the destination resolves equal to it,
             # which would skip the guard and clobber the real file.
@@ -672,7 +780,7 @@ def cmd_apply(args) -> None:
             except Exception as e:
                 failures.append((m["name"], f"{type(e).__name__}: {e}"))
                 continue
-            w.writerow([dest.name, m["from"], m["to"],
+            w.writerow([m["name"], dest.name, m["from"], m["to"],
                         datetime.now().isoformat(timespec="seconds")])
             fh.flush()
             emptied.add((root / m["from"]) if m["from"] != "." else root)
@@ -719,6 +827,127 @@ def cmd_apply(args) -> None:
     print(f"Rollback log: {rb}")
 
 
+# ---------------------------------------------------------------- rollback
+
+def cmd_rollback(args) -> None:
+    """Put every moved file back exactly where it came from.
+
+    The skill promises the whole thing can be undone. Until this existed that
+    promise had no implementation — 9 of 10 agents in the 2026-07-29 stress
+    fleet went looking for it and found only a CSV they were expected to
+    reverse by hand.
+    """
+    current_library()
+    log_path = WORK / "rollback.csv"
+    if not log_path.exists():
+        raise SystemExit("Nothing to undo — this library has never been changed.")
+
+    rows = list(csv.DictReader(log_path.open()))
+    if not rows:
+        raise SystemExit("Nothing to undo — the log is empty.")
+
+    plan = json.loads((WORK / "plan.json").read_text())
+    root = Path(plan["root"]["path"])
+
+    print(f"Undo would put {len(rows)} files back where they were, in "
+          f"'{root.name}'.")
+    for r in rows[:8]:
+        back = r["moved_from"] if r["moved_from"] != "." else "the top level"
+        print(f"  {r['final_name']}  ->  {back}/{r['original_name']}")
+    if len(rows) > 8:
+        print(f"  …and {len(rows) - 8} more")
+    print("\nNothing is deleted by this either — files move back, that is all.")
+
+    if not args.approved_by.strip() or len(args.approved_by.strip()) < 2:
+        print('\nNothing has moved. To go ahead, re-run with:')
+        print('  library.py rollback --approved-by "<their name>"')
+        return
+
+    restored = failed = 0
+    problems: list[str] = []
+    # Newest first, so a file moved twice lands back at its true origin.
+    for r in reversed(rows):
+        src = root / r["moved_to"] / r["final_name"]
+        dest_dir = root / r["moved_from"] if r["moved_from"] != "." else root
+        dest = dest_dir / r["original_name"]
+        if not src.exists():
+            problems.append(f"{r['final_name']} is not where the log says it is")
+            failed += 1
+            continue
+        try:
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            if dest.exists():
+                stem, ext, n = dest.stem, dest.suffix, 2
+                while dest.exists():
+                    dest = dest_dir / f"{stem}-{n}{ext}"
+                    n += 1
+            shutil.move(str(src), str(dest))
+            restored += 1
+        except Exception as e:
+            problems.append(f"{r['final_name']}: {type(e).__name__}")
+            failed += 1
+
+    # Clear the folders the undo emptied — same rule as apply: only truly empty.
+    removed = 0
+    for cat in sorted({r["moved_to"] for r in rows}, key=len, reverse=True):
+        d = root / cat
+        while d != root and d.is_dir() and not any(True for _ in d.iterdir()):
+            parent = d.parent
+            try:
+                d.rmdir(); removed += 1; d = parent
+            except OSError:
+                break
+
+    log_path.rename(WORK / f"rollback-undone-{datetime.now():%Y%m%d-%H%M%S}.csv")
+    plan["approved"] = False
+    plan["rolled_back_at"] = datetime.now().isoformat(timespec="seconds")
+    plan.pop("shown_digest", None)
+    (WORK / "plan.json").write_text(json.dumps(plan, indent=2))
+
+    print(f"\nDone. {restored} files put back, 0 deleted.")
+    if removed:
+        print(f"  {removed} folders that ended up empty were cleared.")
+    if problems:
+        print(f"  {failed} could not be moved back:")
+        for x in problems[:10]:
+            print(f"    {x}")
+    print("The library is back to how it was. You can scan it again any time.")
+
+
+# ---------------------------------------------------------------- status
+
+def cmd_status(args) -> None:
+    """Which library is active, and what state is it in."""
+    ptr = WORK_BASE / "current.json"
+    if not ptr.exists():
+        print("No library scanned yet. Run:  library.py scan \"<your folder>\"")
+        return
+    cur = json.loads(ptr.read_text())
+    current_library()
+    print(f"Current library: {cur['root']}")
+    plan_p = WORK / "plan.json"
+    if plan_p.exists():
+        plan = json.loads(plan_p.read_text())
+        c = plan["counts"]
+        if plan.get("approved"):
+            state = "organised — undo is available"
+        elif plan.get("rolled_back_at"):
+            state = ("put back the way it was on "
+                     f"{plan['rolled_back_at'][:10]} — nothing pending")
+        else:
+            state = "planned, waiting for approval"
+        print(f"  Status: {state}")
+        print(f"  {c['files_total']} files, {c['folders_before']} folders "
+              f"-> {c['folders_after']}")
+    if (WORK / "rollback.csv").exists():
+        n = sum(1 for _ in (WORK / "rollback.csv").open()) - 1
+        print(f"  {n} moves can be undone with:  library.py rollback")
+    others = [d for d in WORK_BASE.iterdir() if d.is_dir() and d.name != WORK.name]
+    if others:
+        print(f"\n  {len(others)} other librar{'y' if len(others) == 1 else 'ies'} "
+              f"also have saved state. Scanning one makes it current.")
+
+
 # ---------------------------------------------------------------- transcribe
 
 def video_minutes(p: Path) -> float:
@@ -732,6 +961,7 @@ def video_minutes(p: Path) -> float:
 
 
 def cmd_transcribe(args) -> None:
+    current_library()
     plan = json.loads((WORK / "plan.json").read_text())
     if not plan.get("approved"):
         raise SystemExit(
@@ -754,7 +984,10 @@ def cmd_transcribe(args) -> None:
         print(f"Skipping {len(links)} shortcut(s) — they point outside this folder and "
               f"will not be sent anywhere.")
     if not videos:
-        raise SystemExit("No videos found. Run scan and apply first.")
+        raise SystemExit(
+            "There are no videos in this library, so there is nothing to transcribe "
+            "and nothing to pay for.\n"
+            "Photos and documents are already organised — you are done.")
 
     todo = []
     for v in videos:
@@ -768,14 +1001,28 @@ def cmd_transcribe(args) -> None:
         return
 
     print(f"Measuring {len(todo)} videos…")
-    minutes = sum(video_minutes(v) for v, _ in todo)
+    lengths = [(v, video_minutes(v)) for v, _ in todo]
+    unreadable = [v for v, m in lengths if m <= 0]
+    minutes = sum(m for _, m in lengths)
     cost = minutes * WHISPER_USD_PER_MIN
     mins = f"{minutes:.0f}" if minutes >= 10 else f"{minutes:.1f}"
     total_bytes = sum(v.stat().st_size for v, _ in todo if v.exists())
-    print(f"\n  {len(todo)} videos, {mins} minutes of audio")
-    print(f"  Estimated cost: ${max(cost, 0.01):.2f} USD (OpenAI {WHISPER_MODEL}, "
+    print(f"\n  {len(todo) - len(unreadable)} videos, {mins} minutes of audio")
+    # A file that cannot be read measured as 0 minutes and quietly vanished into the
+    # quote. Name them instead — three agents were priced for files that were damaged.
+    if unreadable:
+        print(f"  {len(unreadable)} file{'s' if len(unreadable) != 1 else ''} could not be "
+              f"read, so they are skipped — they may be damaged:")
+        for v in unreadable[:5]:
+            print(f"    {v.name}")
+        if len(unreadable) > 5:
+            print(f"    …and {len(unreadable) - 5} more")
+    print(f"  Estimated cost: ${cost:.2f} USD (OpenAI {WHISPER_MODEL}, "
           f"${WHISPER_USD_PER_MIN}/min)")
     print("  This is billed to your own OpenAI account.")
+    if minutes <= 0:
+        print("\n  Nothing readable to transcribe, so there is nothing to pay for.")
+        return
 
     # Drive for Desktop streams by default: reading a video pulls the whole file down.
     # On a big library that can fill the disk long before the API bill matters.
@@ -791,7 +1038,9 @@ def cmd_transcribe(args) -> None:
     print()
 
     if not args.yes:
-        raise SystemExit("Nothing has been sent. Re-run with --yes to go ahead.")
+        print("Nothing has been sent and nothing has been charged.")
+        print("To go ahead:  library.py transcribe --yes")
+        return
 
     if not os.environ.get("OPENAI_API_KEY"):
         raise SystemExit("OPENAI_API_KEY is not set.\n"
@@ -892,6 +1141,13 @@ def main() -> None:
     a = sub.add_parser("apply", help="move the files — needs approval")
     a.add_argument("--approved-by", default="")
     a.set_defaults(func=cmd_apply)
+
+    rb = sub.add_parser("rollback", help="put every moved file back where it was")
+    rb.add_argument("--approved-by", default="")
+    rb.set_defaults(func=cmd_rollback)
+
+    st = sub.add_parser("status", help="which library is active and what state it is in")
+    st.set_defaults(func=cmd_status)
 
     t = sub.add_parser("transcribe", help="make it searchable (costs a few dollars)")
     t.add_argument("--yes", action="store_true", help="confirm the cost and go ahead")

@@ -58,9 +58,12 @@ about pricing" work.
 Event folders: `Event Name Month` or `YYYY-MM-DD Event Name`. Pick one and hold it across the
 whole library. Mixed conventions are what makes a Drive unsearchable.
 
-Files get renamed to `{date}_{event}_{type}_{description}_{seq}.{ext}` — lowercase, underscores
-between fields, hyphens inside them. This is what puts the shot type in the filename so the
-folder does not have to carry it.
+**Nothing is renamed.** Files keep the names they already have — the only exception is two
+files with the same name arriving from different folders, where the second gets `-2` added
+rather than overwriting the first.
+
+If someone wants a naming convention for new work, `{date}_{event}_{type}_{description}_{seq}`
+holds up well. Applying it to existing files is a separate job and a bigger conversation.
 
 ## When someone asks for deeper folders
 

@@ -19,7 +19,9 @@ sign into their own Google account, and paste one key. Everything else is yours.
 Two promises to state out loud, early, in these words:
 
 1. **Nothing changes until you approve it.** They see two pictures of the exact plan first.
-2. **Nothing is ever deleted.** Files move, every move is written down, and it can all be undone.
+2. **No file is ever deleted, and it can all be undone.** Files move, every move is written
+   down, and `library.py rollback` puts the whole thing back. Folders left completely empty are
+   tidied away — say that out loud too, so it is never a surprise.
 
 ---
 
@@ -44,7 +46,16 @@ fixes for them**:
   Drive takes a while to appear the first time.
 - **The OpenAI key** — walk them through it using Step 2 below.
 
-Re-run `check` after each one until it says everything is ready. Do not move on before that.
+**It works on any folder on their computer** — an external drive of footage, a local Projects
+folder, a Dropbox folder. Google Drive for Desktop is just the usual way to get a Drive onto the
+machine as a normal folder. If their media is already local, they need nothing at all installed.
+
+**Only Google Drive for Desktop is required, and only if their media lives in Drive.** Organising their folders needs nothing else —
+no key, no account, no cost. ffmpeg, the OpenAI package and the key are needed *only* if they
+want the searchable transcripts in Step 7, and they can decide that later.
+
+So: get Drive for Desktop working, then carry on. Come back to the rest if and when they want
+transcription. Re-run `check` after each install to confirm it took.
 
 Full detail on every install, with a fix for each way it fails:
 [references/setup.md](references/setup.md).
@@ -173,6 +184,15 @@ Moves every file, colours the folders in Finder, clears away the folders it empt
 and left exactly where it was.
 
 Tell them Drive will now sync the new layout back up, and on a big library that takes a while.
+
+**If they want it back**, at any point:
+
+```bash
+python3 ~/.claude/skills/media-library-setup/scripts/library.py rollback
+```
+
+Shows what it would put back and changes nothing. Add `--approved-by "<their name>"` to do it.
+`library.py status` says which library is active and whether an undo is available.
 
 ---
 

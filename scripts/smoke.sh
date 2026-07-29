@@ -121,7 +121,7 @@ checks = {
         pathlib.Path("/nonexistent-dir/._family-archive.mp4")),
     "rollback appends, never truncates": 'rb.open("a"' in src,
     "move happens before the log claims it": src.index("shutil.move(str(src)") <
-                                             src.index('w.writerow([dest.name'),
+                                             src.index('w.writerow([m["name"], dest.name'),
     "transcript name keeps the extension": 'f"{v.name}.transcript.md"' in src
                                            and 'f"{v.stem}.transcript.md"' not in src,
     "paid text is banked before any disk work": "banked.write_text(text)" in src,
@@ -133,13 +133,43 @@ checks = {
                                  and lib.category(pathlib.Path("a.jpg")) == "Photos"
                                  and lib.category(pathlib.Path("a.pdf")) == "Documents"
                                  and lib.category(pathlib.Path("a.transcript.md")) == "_Index"),
-    "no-delete promise stated": "never deleted" in skill.lower() or "Nothing is ever deleted" in skill,
+    "no-delete promise stated": "No file is ever deleted" in skill,
     "rollback documented": "rollback.csv" in skill,
     "no-delete boundary is explicit": "Never delete a file" in skill,
     "transcription is built in": "transcribe" in skill,
     "uses Drive for Desktop, not the API": "Drive for Desktop" in skill,
     "self-heals rather than escalating": "self-heal" in skill.lower(),
     "publishing firewall: no names or contacts": not any(b in both for b in BANNED),
+    # --- 2026-07-29 stress fleet: 14 agents, themes with 3+ distinct hits
+    "each library gets its own state folder": "library_slug" in src and "use_library" in src,
+    "state dir is overridable for testing": "MEDIA_LIBRARY_WORK_DIR" in src,
+    "empty library stops at scan": "no photos, videos or documents" in src,
+    "never asks approval for a no-op": "nothing to approve" in src,
+    "transcribe is honest when there are no videos": "nothing to transcribe" in src
+                                                     and "Run scan and apply first" not in src,
+    "layout message handles no-subfolder case": "everything sits in one folder" in src,
+    "docs agree that nothing is renamed": "Nothing is renamed" in rules
+                                          and "Files get renamed to" not in rules,
+    "organising is stated as free of prerequisites": "Only Google Drive for Desktop is required" in skill,
+    # --- 2026-07-29 stress fleet round 2
+    "rollback command exists": "cmd_rollback" in src and '"rollback"' in src,
+    "rollback is documented for the owner": "library.py rollback" in skill,
+    "rollback log records the original name": '"original_name"' in src,
+    "status command exists": "cmd_status" in src,
+    "cost preview exits clean, not as an error": "Nothing has been sent and nothing has been charged" in src,
+    "delete promise distinguishes files from folders": "No file is ever deleted" in skill,
+    "folder-cleared stat counts what apply really clears": "will_clear" in src,
+    "says it works on any folder, not only Drive": "any folder on their computer" in skill,
+    # --- 2026-07-29 stress fleet round 3
+    "rollback preview exits clean, not as an error": "Nothing has moved. To go ahead" in src
+                                                     and "raise SystemExit(\n            '\\nNothing has moved" not in src,
+    "status is truthful after an undo": "rolled_back_at" in src,
+    "unreadable video is named, not silently priced": "they may be damaged" in src and "unreadable" in src,
+    "renames are decided at plan time, before approval": '"renames"' in src
+                                                         and 'm["final_name"]' in src,
+    "apply uses the name the plan showed": 'm.get("final_name", m["name"])' in src,
+    "approval digest covers renames too": 'm.get("final_name", m["name"])] ' in src
+                                          or 'final_name", m["name"])\n' in src,
 }
 
 # The install prompt quotes the number of checks. If that number goes stale, the very
