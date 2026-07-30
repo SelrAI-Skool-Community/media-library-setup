@@ -11,6 +11,7 @@ python3 - "$skill_dir" <<'PY'
 import importlib.util
 import json
 import pathlib
+import re
 import sys
 import tempfile
 
@@ -93,9 +94,15 @@ a_library = {"folders": [{"name": n, "depth": 1, "path": n, "id": n} for n in
 # "go ask a human" fallback. Assembled from words so this list does not itself trip
 # a publishing scan looking for those same phrases.
 BANNED = tuple(" ".join(w) for w in (
-    ("@gmail.com",), ("@selrai",), ("@selrgroup",), ("+61",), ("Luke",),
+    ("@gmail.com",), ("@selrai",), ("@selrgroup",), ("+61",),
     ("ask", "us"), ("contact", "us"), ("message", "us"), ("reach", "out"),
-    ("if", "you", "get", "stuck"), ("tell", "Luke"), ("ask", "Luke")))
+    ("if", "you", "get", "stuck")))
+
+# The owner is on their own machine with their AI, so no doc may send them off to a
+# named person. Matched as a pattern rather than a list of names, which catches any
+# name and means no real one has to be written down here to be caught.
+ESCALATION = re.compile(r"\b(?:ask|tell|email|message|contact|check with)\s+"
+                        r"(?!Claude\b)[A-Z][a-z]+")
 
 checks = {
     "approval gate enforced in code": not gate_errors,
@@ -144,7 +151,8 @@ checks = {
     "transcription is built in": "transcribe" in skill,
     "uses Drive for Desktop, not the API": "Drive for Desktop" in skill,
     "self-heals rather than escalating": "self-heal" in skill.lower(),
-    "publishing firewall: no names or contacts": not any(b in both for b in BANNED),
+    "publishing firewall: no contacts, no escalating to a named human":
+        not any(b in both for b in BANNED) and not ESCALATION.search(both),
     # --- hardening round 1: one check per issue found, so none can come back
     "each library gets its own state folder": "library_slug" in src and "use_library" in src,
     "state dir is overridable for testing": "MEDIA_LIBRARY_WORK_DIR" in src,
@@ -192,10 +200,9 @@ checks = {
 
 # The install prompt quotes the number of checks. If that number goes stale, the very
 # first thing the owner runs looks broken. Assert the docs match what actually prints.
-import re as _re
 _docs = [("SETUP-PROMPT.md", setup_prompt), ("README.md", readme)]
 _quoted = [(lbl, int(n)) for lbl, d in _docs
-           for n in _re.findall(r"ok: (\d+) media-library-setup contract checks", d)]
+           for n in re.findall(r"ok: (\d+) media-library-setup contract checks", d)]
 TOTAL = len(checks) + len(_quoted)
 for lbl, n in _quoted:
     checks[f"{lbl} quotes the real check count"] = (n == TOTAL)

@@ -39,7 +39,7 @@ The short version: one folder per event, and inside each, four folders — Video
 Documents, and `_Index` for the searchable text. Nothing goes deeper than that.
 
 3,412 files move. 27 near-empty folders disappear. **Nothing is deleted** — every move is
-written to a rollback file first, so this is fully reversible.
+written to a rollback file as it happens, so this is fully reversible.
 
 Have a look at both, and tell me to go ahead when you are happy.
 

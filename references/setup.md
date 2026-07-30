@@ -44,16 +44,27 @@ app from the menu bar and check.
 
 ## 2. Python and the OpenAI package — the plumbing
 
-Every Mac already has Python. Check it, and add the one package that talks to the
-transcription service:
+Every command in this skill runs through Python, including the free organising steps, so this
+one is not optional. Check it first:
 
 ```bash
 python3 --version
-pip3 install openai
 ```
 
-`python3: command not found` on a Mac means the developer tools are missing. Run
-`xcode-select --install`, click through the installer, then try again.
+- **Mac** — it comes with the developer tools. `python3: command not found` means those are
+  missing: run `xcode-select --install`, click through the installer, then try again.
+- **Windows** — Windows ships without Python. Install it from
+  **https://www.python.org/downloads/** (or `winget install Python.Python.3.12`) and tick
+  **"Add python.exe to PATH"** in the installer, then open a new terminal. If `python3` is
+  still not found but `python` works, use `python` in place of `python3` everywhere.
+- **Linux** — already there on any modern distro; `sudo apt install python3` if not.
+
+Then the one package that talks to the transcription service. This part is only needed for the
+transcripts, so it can wait until they want them:
+
+```bash
+pip3 install openai
+```
 
 If `pip3` refuses with `externally-managed-environment`, that Python is managed by the system.
 Run `pip3 install --user --break-system-packages openai` instead.
@@ -147,7 +158,7 @@ visuals and say yes.
 | `ffmpeg: command not found` | Not installed, or a new terminal is needed | Re-run the install, then open a fresh terminal |
 | `No module named openai` | The package is not installed for this Python | `pip3 install openai` |
 | `externally-managed-environment` | That Python is system-managed | `pip3 install --user --break-system-packages openai` |
-| `python3: command not found` | Mac developer tools missing | `xcode-select --install`, then retry |
+| `python3: command not found` | Mac: developer tools missing. Windows: Python not installed | Mac: `xcode-select --install`. Windows: install Python with **Add to PATH** ticked, then a new terminal |
 | `OPENAI_API_KEY is not set` | The setting did not stick | Mac/Linux: re-run the `echo` line then `source ~/.zshrc`. Windows: re-run `setx`, then open a **new** terminal |
 | Folders have no colours | Colour tags are a Mac feature | Nothing is wrong — the folders are organised identically, just without colours |
 | The two pictures did not open | No default browser set | The paths are printed on screen; open them by hand. **Do not skip this step** |

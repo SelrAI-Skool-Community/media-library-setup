@@ -13,7 +13,7 @@ Anyone whose Drive fills up faster than it gets filed. Event footage, client sho
 social content. If finding an old clip currently means twenty minutes of clicking through
 folders, this is for you.
 
-You do not need to be technical. Past the one install line below, you never type a command —
+You do not need to be technical. Past the two install lines below, you never type a command —
 Claude runs the rest and tells you what came back. You install one app, sign into your own
 Google account, and paste one key if you want the search feature.
 

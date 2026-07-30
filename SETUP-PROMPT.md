@@ -30,6 +30,9 @@ Works on **Mac and Windows**.
 
 ## What you need
 
+- **Python** — already on a Mac. On Windows, install it from
+  https://www.python.org/downloads/ and tick **"Add python.exe to PATH"**. Everything here runs
+  through it, so it is the one piece needed even if you never transcribe.
 - **Google Drive for Desktop** — https://www.google.com/drive/download/
   Makes your Drive a normal folder on your computer. No API, no developer account.
 - **ffmpeg** — `brew install ffmpeg` (Mac), `winget install Gyan.FFmpeg` (Windows)

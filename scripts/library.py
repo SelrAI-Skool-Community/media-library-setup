@@ -17,7 +17,8 @@ Eight commands, the first six run in order:
     library.py status                        which library is active, what state it is in
 
 `apply` refuses to run unless a plan exists, the visuals were generated, and a person
-is named. Every move is written to rollback.csv before it happens.
+is named. Each move is recorded in rollback.csv the instant it succeeds, and flushed to
+disk, so the log never claims a move that did not happen and never loses one that did.
 """
 from __future__ import annotations
 
@@ -619,7 +620,7 @@ def cmd_visualise(args) -> None:
   {rename_tile}
 </div>
 <div class="safe"><b>No file is ever deleted.</b> Files are moved, never removed, and every move is
-written down first — one command puts the whole thing back exactly as it was. Folders that end up
+written down as it happens — one command puts the whole thing back exactly as it was. Folders that end up
 completely empty afterwards are tidied away; anything still holding a file is left alone.</div>
 """
 

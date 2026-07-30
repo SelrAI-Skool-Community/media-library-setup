@@ -33,6 +33,11 @@ First command, every time, before anything else:
 python3 ~/.claude/skills/media-library-setup/scripts/library.py check
 ```
 
+If that line itself fails with `python3: command not found`, Python is the first install, not a
+detail — Macs get it from `xcode-select --install`, Windows has none out of the box and needs
+**https://www.python.org/downloads/** with *Add python.exe to PATH* ticked and a fresh terminal
+after. Then run `check` again.
+
 It lists what is ready and what is not, with the fix for each. Read the result and **do the
 fixes for them**:
 
@@ -50,11 +55,12 @@ fixes for them**:
 
 **It works on any folder on their computer** — an external drive of footage, a local Projects
 folder, a Dropbox folder. Google Drive for Desktop is just the usual way to get a Drive onto the
-machine as a normal folder. If their media is already local, they need nothing at all installed.
+machine as a normal folder. If their media is already local, that install is not needed either.
 
-**Only Google Drive for Desktop is required, and only if their media lives in Drive.** Organising their folders needs nothing else —
-no key, no account, no cost. ffmpeg, the OpenAI package and the key are needed *only* if they
-want the searchable transcripts in Step 7, and they can decide that later.
+**Only Google Drive for Desktop is required past Python, and only if their media lives in
+Drive.** Organising their folders needs nothing else — no key, no account, no cost. ffmpeg, the
+OpenAI package and the key are needed *only* if they want the searchable transcripts in Step 7,
+and they can decide that later.
 
 So: get Drive for Desktop working, then carry on. Come back to the rest if and when they want
 transcription. Re-run `check` after each install to confirm it took.
@@ -231,15 +237,19 @@ most questions without opening anything else.
 
 ## Step 8 — hand them the report
 
-Finish by generating their skill report:
+The report ships inside the folder. Open it for them:
 
-```
-Run /skill-install-report on media-library-setup
+```bash
+open ~/.claude/skills/media-library-setup/SELR-REPORT.html      # Mac
+start %USERPROFILE%\.claude\skills\media-library-setup\SELR-REPORT.html   # Windows
 ```
 
-It reads every file, runs six security checks, and produces a branded page showing exactly what
-this thing does, what it touches, and what it cannot do. Open it for them and walk the verdict.
-That page is what they keep.
+It runs through six security checks and shows in plain English exactly what this thing does,
+what it touches, and what it cannot do. Walk the verdict with them. That page is what they keep.
+
+If they happen to have the `skill-install-report` skill installed as well, running it on
+media-library-setup regenerates the same page from the files currently on their disk. Optional —
+never install anything for this step.
 
 ---
 

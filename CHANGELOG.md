@@ -1,5 +1,26 @@
 # media-library-setup Changelog
 
+## 0.8.1 — 2026-07-30
+
+Independent verification pass on the shipped folder, from the position of someone who has
+just unzipped it and nothing else.
+
+- **The last step pointed at a skill that is not in the folder.** Step 8 told Claude to run
+  `/skill-install-report`, which a standalone install does not have, so the run ended on a
+  failure. It now opens `SELR-REPORT.html`, which ships inside the folder, and treats the
+  separate skill as an optional way to regenerate it.
+- **Windows had no route to Python**, which every command here runs through. Setup called it a
+  Mac formality and covered only the Mac fix. Now: the python.org install with *Add to PATH*,
+  the `python` versus `python3` fallback, and a fix if the very first `check` line fails.
+- **The docs promised a rollback row was written before each move; the code moves first.** That
+  ordering is deliberate — the log must never claim a move that did not happen — so the wording
+  changed rather than the code, in the visuals, the report and the walkthrough.
+- The offline check no longer carries an author's first name in its own banned-phrase list. It
+  matches "send them to a named person" as a pattern instead, which catches any name.
+- Install prose said one line and then printed two.
+
+74 contract checks, unchanged.
+
 ## 0.8.0 — 2026-07-29
 
 Independent review of the rollback and per-library code, none of which existed when
