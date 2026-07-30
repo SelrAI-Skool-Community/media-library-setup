@@ -32,7 +32,7 @@ Works on **Mac and Windows**.
 
 - **Google Drive for Desktop** — https://www.google.com/drive/download/
   Makes your Drive a normal folder on your computer. No API, no developer account.
-- **ffmpeg** — `brew install ffmpeg` (Mac), `winget install ffmpeg` (Windows)
+- **ffmpeg** — `brew install ffmpeg` (Mac), `winget install Gyan.FFmpeg` (Windows)
 - **An OpenAI key** — https://platform.openai.com/api-keys
   Only for transcription. About **$0.36 per hour of video**, billed to your own account.
   You are shown the exact cost before anything is sent. $5 goes a long way.

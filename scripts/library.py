@@ -5,7 +5,7 @@ Works on a normal folder on this computer. With Google Drive for Desktop install
 that folder IS your Google Drive, and everything syncs back up on its own. No API,
 no Cloud project, no OAuth.
 
-Six commands, run in order:
+Eight commands, the first six run in order:
 
     library.py check                         what is installed, what is missing
     library.py scan <folder>                 read-only. Writes scan.json
@@ -38,8 +38,8 @@ from pathlib import Path
 
 # Every library gets its OWN state folder, keyed by the folder being organised.
 # One shared folder meant scanning a second library silently overwrote the first
-# library's plan and mixed both libraries into one rollback log — every agent in
-# the 2026-07-29 stress fleet hit this. MEDIA_LIBRARY_WORK_DIR overrides the base.
+# library's plan and mixed both libraries into one rollback log, so anyone with two
+# shoots lost their undo. MEDIA_LIBRARY_WORK_DIR overrides the base.
 WORK_BASE = Path(os.environ.get("MEDIA_LIBRARY_WORK_DIR",
                                 Path.home() / "active" / "media-library-setup"))
 WORK = WORK_BASE          # replaced per-library by use_library() / current_library()
@@ -122,7 +122,7 @@ def category(p: Path) -> str:
 
 
 def is_junk(p: Path) -> bool:
-    """OS litter only. Never a file the member would miss.
+    """OS litter only. Never a file the owner would miss.
 
     `._name` is macOS's AppleDouble sidecar, but a person can legitimately name a
     file that. Treat it as litter only when the file it shadows is actually there,
@@ -256,7 +256,7 @@ def cmd_check(args) -> None:
         else:
             how = ("brew install ffmpeg\n"
                    "    No Homebrew? Install it from https://brew.sh first." if IS_MAC else
-                   "winget install ffmpeg\n"
+                   "winget install Gyan.FFmpeg\n"
                    "    Then close this window and open a new one." if IS_WIN else
                    "sudo apt install ffmpeg")
             todo.append((f"{tool} is missing", f"Needed to transcribe — it {why}.", how))
@@ -537,7 +537,7 @@ def cmd_visualise(args) -> None:
 
     # Only count folders this plan genuinely empties. A source folder does NOT clear
     # if it still holds files afterwards, or if a destination folder is created inside
-    # it — promising to remove folders apply never touches was a lie four agents caught.
+    # it. Promising to remove folders apply never touches would be a false promise.
     from_dirs = Counter(m["from"] for m in plan["moves"])
     leaving = Counter(m["from"] for m in plan["moves"] if m["from"] != m["to"])
     dest_parents = {re.split(r"[\\/]", d)[0] for d in plan["per_destination"]
@@ -811,7 +811,7 @@ def cmd_apply(args) -> None:
 
     # Only clear folders this plan actually emptied, and only when they are truly
     # empty. Sweeping every empty folder under the root would delete folders the
-    # member made on purpose and had nothing to do with the move.
+    # owner made on purpose and had nothing to do with the move.
     removed = 0
     candidates = {p for p in emptied if p != root}
     while candidates:
@@ -855,10 +855,9 @@ def cmd_apply(args) -> None:
 def cmd_rollback(args) -> None:
     """Put every moved file back exactly where it came from.
 
-    The skill promises the whole thing can be undone. Until this existed that
-    promise had no implementation — 9 of 10 agents in the 2026-07-29 stress
-    fleet went looking for it and found only a CSV they were expected to
-    reverse by hand.
+    The skill promises the whole thing can be undone, so the undo has to be a
+    command anyone can run. A rollback.csv the owner is expected to reverse by
+    hand is not an undo.
     """
     current_library(getattr(args, "library", None))
     log_path = WORK / "rollback.csv"
@@ -913,7 +912,7 @@ def cmd_rollback(args) -> None:
             unfinished.add(r["final_name"])
             failed += 1
 
-    # apply corrects a folder's casing (a member's `videos` becomes `Videos`), so the
+    # apply corrects a folder's casing (their `videos` becomes `Videos`), so the
     # undo has to put the original casing back too or the library is not truly as it was.
     # Every component, outermost first — force_case only fixes the last one, and the
     # parent (`videos`) is exactly the folder apply renamed.
@@ -1029,7 +1028,7 @@ def cmd_transcribe(args) -> None:
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
         raise SystemExit("ffmpeg is needed to pull audio out of video.\n"
                          "  Mac:   brew install ffmpeg\n"
-                         "  Win:   winget install ffmpeg\n"
+                         "  Win:   winget install Gyan.FFmpeg\n"
                          "  Linux: sudo apt install ffmpeg")
 
     videos = sorted(p for p in root.rglob("*")
@@ -1065,8 +1064,8 @@ def cmd_transcribe(args) -> None:
     mins = f"{minutes:.0f}" if minutes >= 10 else f"{minutes:.1f}"
     total_bytes = sum(v.stat().st_size for v, _ in todo if v.exists())
     print(f"\n  {len(todo) - len(unreadable)} videos, {mins} minutes of audio")
-    # A file that cannot be read measured as 0 minutes and quietly vanished into the
-    # quote. Name them instead — three agents were priced for files that were damaged.
+    # A file that cannot be read measures as 0 minutes and would quietly vanish into
+    # the quote. Name them instead, so a damaged file is visible and not just missing.
     if unreadable:
         print(f"  {len(unreadable)} file{'s' if len(unreadable) != 1 else ''} could not be "
               f"read, so they are skipped — they may be damaged:")

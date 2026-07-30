@@ -37,9 +37,11 @@ It lists what is ready and what is not, with the fix for each. Read the result a
 fixes for them**:
 
 - **ffmpeg** — run the line `check` prints for their computer: `brew install ffmpeg` on a Mac
-  (send them to https://brew.sh first if Homebrew is missing), `winget install ffmpeg` on
-  Windows, `sudo apt install ffmpeg` on Linux. On Windows they must open a new terminal after.
-- `pip3 install openai` — run it.
+  (send them to https://brew.sh first if Homebrew is missing), `winget install Gyan.FFmpeg`
+  on Windows, `sudo apt install ffmpeg` on Linux. On Windows they must open a new terminal
+  after.
+- `pip3 install openai` — run it. If it refuses with `externally-managed-environment`, run
+  `pip3 install --user --break-system-packages openai` instead.
 - **Google Drive for Desktop** — they must install this themselves; it is a normal Mac app.
   Send them to https://www.google.com/drive/download/, tell them to sign in with the Google
   account holding their media, and to choose **"Stream files"** when asked. Then wait — a big

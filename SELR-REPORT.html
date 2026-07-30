@@ -164,7 +164,7 @@ footer.sr-foot b{color:var(--ink-2);font-weight:650}
 <!-- ====== OVERVIEW ====== -->
 <section id="overview">
   <h1>media-library-setup</h1>
-  <p class="sub">Installed to ~/.claude/skills/media-library-setup · reviewed 29 Jul 2026.
+  <p class="sub">Installed to ~/.claude/skills/media-library-setup · reviewed 30 Jul 2026.
   A skill is a folder of written instructions your AI picks up when your request matches it.
   This report is what Selr AI found when it read every file inside before letting it run.</p>
 
@@ -188,7 +188,7 @@ footer.sr-foot b{color:var(--ink-2);font-weight:650}
   </div>
 
   <div class="grid kpis">
-    <div class="tile"><p class="lab">Files inside</p><span class="val">9</span>
+    <div class="tile"><p class="lab">Files inside</p><span class="val">10</span>
       <p class="cap">Every one was opened and read for this report.</p></div>
     <div class="tile"><p class="lab">Always-on cost</p><span class="val">84<span class="unit">tokens</span></span>
       <p class="cap">What this skill adds to every conversation before you type. Healthy is under 80, so this is a shade high but harmless.</p></div>
@@ -318,21 +318,23 @@ footer.sr-foot b{color:var(--ink-2);font-weight:650}
     <tr><th>File</th><th>What it is</th><th class="n">Size</th><th>Review</th></tr>
     <tr><td><code>SKILL.md</code></td><td>The step-by-step your AI follows, from install to finished library</td><td class="n">12 KB</td>
       <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
-    <tr><td><code>scripts/library.py</code></td><td>Does all the work: checking your setup, counting, planning, drawing the pictures, moving, transcribing</td><td class="n">40 KB</td>
+    <tr><td><code>scripts/library.py</code></td><td>Does all the work: checking your setup, counting, planning, drawing the pictures, moving, transcribing</td><td class="n">54 KB</td>
       <td><span class="pill warning"><span class="dot"></span>Moves files · 1 network call</span></td></tr>
-    <tr><td><code>scripts/smoke.sh</code></td><td>A self-test that proves the safety gates still work. Runs offline, touches nothing</td><td class="n">8 KB</td>
+    <tr><td><code>scripts/smoke.sh</code></td><td>A self-test that proves the safety gates still work. Runs offline, touches nothing</td><td class="n">12 KB</td>
       <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
-    <tr><td><code>references/setup.md</code></td><td>The three installs, with links and a fix for each way they fail</td><td class="n">8 KB</td>
+    <tr><td><code>references/setup.md</code></td><td>The four installs, with links and a fix for each way they fail</td><td class="n">6 KB</td>
       <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
-    <tr><td><code>references/structure-rules.md</code></td><td>Why the folders stay flat, and the rule that stops them nesting</td><td class="n">4 KB</td>
+    <tr><td><code>references/structure-rules.md</code></td><td>Why the folders stay flat, and the rule that stops them nesting</td><td class="n">3 KB</td>
       <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
     <tr><td><code>examples/…session.md</code></td><td>A worked example of a real run</td><td class="n">4 KB</td>
       <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
-    <tr><td><code>SETUP-PROMPT.md</code></td><td>Paste-into-Claude installer and check</td><td class="n">4 KB</td>
+    <tr><td><code>SETUP-PROMPT.md</code></td><td>Paste-into-Claude installer and check</td><td class="n">2 KB</td>
       <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
-    <tr><td><code>CHANGELOG.md</code></td><td>What changed and when</td><td class="n">4 KB</td>
+    <tr><td><code>README.md</code></td><td>What this does, who it is for, and the 60-second install</td><td class="n">5 KB</td>
       <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
-    <tr><td><code>SELR-REPORT.html</code></td><td>This page, so it travels with the skill</td><td class="n">40 KB</td>
+    <tr><td><code>CHANGELOG.md</code></td><td>What changed and when</td><td class="n">11 KB</td>
+      <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
+    <tr><td><code>SELR-REPORT.html</code></td><td>This page, so it travels with the skill</td><td class="n">37 KB</td>
       <td><span class="pill good"><span class="dot"></span>Clean</span></td></tr>
   </table></div>
   <p class="note">Sizes are on-disk. "Clean" means the file was read in full and nothing in it
@@ -355,7 +357,7 @@ footer.sr-foot b{color:var(--ink-2);font-weight:650}
       one thing: the <code>OPENAI_API_KEY</code> you set yourself, and only when transcribing. The
       setup guide has you check that key is present without ever printing it.</p></div>
     <div class="issue"><div class="head"><span class="pill warning"><span class="dot"></span>Flag</span><h3>Network calls</h3></div>
-      <p>One destination: OpenAI's transcription service, at <code>library.py</code> line 719.
+      <p>One destination: OpenAI's transcription service, at <code>library.py</code> line 1146.
       Audio taken from your videos is sent there to be turned into text. It is the whole point of
       that step, it quotes the cost in dollars first, and it sends nothing without <code>--yes</code>.
       Skip the transcribe step and this skill makes no network calls at all.</p></div>
@@ -417,7 +419,7 @@ footer.sr-foot b{color:var(--ink-2);font-weight:650}
 
 <footer class="sr-foot" id="sr-brand">
   <svg class="logo" viewBox="430 402 440 95" xmlns="http://www.w3.org/2000/svg" aria-label="Selr AI"><path fill="var(--sr)" d="M466.43,429.13h48.92v-24.47h-67.3c-8.91,0-16.13,7.22-16.13,16.13,0,5.23,2.54,10.14,6.8,13.16l27.71,19.65v-24.47Z"/><path fill="var(--sr)" d="M483.68,446.39v24.47h-49.91v24.47h68.29c8.91,0,16.13-7.22,16.13-16.14,0-5.23-2.54-10.14-6.8-13.16l-27.71-19.65Z"/><path fill="var(--ink)" d="M619.04,448.4c-3.69-1.57-8.46-3.13-14.34-4.7-4.23-1.1-7.54-2.1-9.93-3-2.39-.9-4.39-2.13-6-3.7-1.61-1.57-2.41-3.64-2.41-6.23,0-2.12.65-4.04,1.94-5.76,1.29-1.72,3.07-3.07,5.35-4.06,2.27-.98,4.86-1.47,7.76-1.47,4.78,0,8.68,1.29,11.7,3.88,3.02,2.59,4.88,5.96,5.58,10.11l13.05-2.7c-.63-4.39-2.25-8.29-4.88-11.7-2.63-3.41-6.1-6.07-10.41-7.99-4.31-1.92-9.17-2.88-14.58-2.88s-10.33,1.02-14.75,3.06c-4.43,2.04-7.9,4.82-10.4,8.35-2.51,3.53-3.76,7.49-3.76,11.87,0,5.25,1.29,9.46,3.88,12.64,2.59,3.17,5.68,5.53,9.29,7.05,3.6,1.53,8.31,3.04,14.11,4.53,4.31,1.17,7.74,2.25,10.29,3.23,2.54.98,4.64,2.31,6.29,4,1.65,1.69,2.47,3.9,2.47,6.64,0,2.27-.7,4.31-2.12,6.11-1.41,1.8-3.37,3.23-5.88,4.29-2.51,1.06-5.37,1.59-8.58,1.59-5.33,0-9.58-1.21-12.76-3.64-3.17-2.43-5.15-5.88-5.94-10.35l-13.05,2.7c1.02,6.9,4.35,12.38,9.99,16.46,5.64,4.08,12.77,6.11,21.4,6.11,5.64,0,10.78-1.02,15.4-3.06,4.62-2.04,8.27-4.86,10.93-8.46,2.66-3.6,4-7.64,4-12.11,0-5.64-1.35-10.13-4.06-13.46-2.7-3.33-5.9-5.78-9.58-7.35"/><path fill="var(--ink)" d="M684.58,435.17c-4.98-3.17-10.64-4.76-16.99-4.76-5.8,0-11.09,1.37-15.87,4.11-4.78,2.74-8.54,6.51-11.29,11.29-2.75,4.78-4.11,10.07-4.11,15.87s1.39,11.07,4.17,15.81c2.78,4.74,6.6,8.48,11.46,11.23,4.86,2.75,10.27,4.11,16.22,4.11,6.35,0,12.01-1.53,16.99-4.59,4.98-3.06,8.8-7.13,11.46-12.23l-10.35-4.59c-1.72,3.37-4.13,6-7.23,7.88-3.1,1.88-6.6,2.82-10.52,2.82s-7.29-.9-10.35-2.7c-3.06-1.8-5.45-4.25-7.17-7.35-1.09-1.95-1.83-4.05-2.23-6.29h49.73c.7-6.43-.2-12.34-2.7-17.75-2.51-5.41-6.25-9.7-11.23-12.87M657.89,443.81c2.94-1.8,6.17-2.7,9.7-2.7s6.7.82,9.52,2.47c2.82,1.65,5.07,3.92,6.76,6.82,1.05,1.8,1.8,3.72,2.25,5.76h-37.06c.42-1.73,1.05-3.38,1.89-4.94,1.68-3.13,4-5.6,6.94-7.41"/><rect fill="var(--ink)" x="704.5" y="404.66" width="12.34" height="87"/><path fill="var(--ink)" d="M750,431.29c-3.37,1.06-6.27,3.35-8.7,6.88-1.7,2.47-3.07,5.6-4.11,9.38v-15.96h-12.34v60.08h12.34v-33.98c0-3.76,1.04-7,3.11-9.7,2.08-2.7,4.92-4.53,8.52-5.47,3.6-.94,7.52-.82,11.76.35v-11.76c-3.68-.94-7.21-.88-10.58.18"/><path fill="var(--ink)" d="M810.24,409.36l-35.74,82.3h9.41l9.47-21.98h43.13l9.47,21.98h9.64l-35.62-82.3h-9.76ZM796.93,461.44l18.02-41.82,18.02,41.82h-36.04Z"/><rect fill="var(--ink)" x="859.03" y="409.36" width="9.05" height="82.3"/></svg>
-  <span><b>Made by Selr AI</b> · Skill install report · generated 29 Jul 2026 ·
+  <span><b>Made by Selr AI</b> · Skill install report · generated 30 Jul 2026 ·
   every file in this skill was read in full before this report was written.</span>
 </footer>
 

@@ -5,7 +5,7 @@
 Independent review of the rollback and per-library code, none of which existed when
 the last review ran. 12 findings, every one traced and reproduced before fixing.
 
-Two were serious, and both were introduced the same day:
+Two were serious:
 
 - **A partial undo destroyed its own retry path.** If one file could not be found — because
   the owner had moved or renamed it — the whole log was archived anyway. The files that did
@@ -37,18 +37,18 @@ The rest, all confirmed by tracing:
 
 ## 0.7.0 — 2026-07-29
 
-Third stress-fleet round, 8 agents attacking the new undo. It held — multiple agents
-confirmed a library comes back byte-for-byte identical, including one with five files
-sharing a name across five folders. No theme above 4 agents, so the fleet converged.
+Third hardening round, attacking the new undo. It held: a library comes back
+byte-for-byte identical, including one with five files sharing a name across five
+folders.
 
-- **4/8: the undo preview exited as an error.** Same bug class as the cost preview,
+- **The undo preview exited as an error.** Same bug class as the cost preview,
   missed on rollback. Exits 0 now.
-- **4/8: `status` still said "waiting for approval" after an undo**, which reads as though
+- **`status` still said "waiting for approval" after an undo**, which reads as though
   the organise never happened. Now says it was put back, with the date.
-- **3/8: damaged videos were silently priced.** A file that could not be read measured as
+- **Damaged videos were silently priced.** A file that could not be read measured as
   zero minutes and disappeared into the quote. They are now named, skipped, and the quote
   says $0.00 rather than a rounded-up cent.
-- **2/8, kept because it undermines the core guarantee: renames happened after approval.**
+- **Renames happened after approval**, which undermines the core guarantee.
   Two files with the same name landing in one folder got a `-2` suffix decided inside
   apply — after the owner had approved. So "you see the exact plan first" was not true for
   renames. They are now worked out at plan time, printed in the plan, shown as their own
@@ -59,24 +59,24 @@ sharing a name across five folders. No theme above 4 agents, so the fleet conver
 
 ## 0.6.0 — 2026-07-29
 
-Second stress-fleet round, 10 agents attacking the round-1 fixes. The two-library
-fix held. Six new themes, counted by distinct agents.
+Second hardening round, attacking the round-1 fixes. The two-library fix held.
+Six new issues:
 
-- **9/10: there was no way to undo.** The headline promise is "it can all be put back", and no
-  `rollback` command existed — agents went looking and found only a CSV they were expected to
-  reverse by hand. `rollback` now exists: previews what it would restore, changes nothing without
+- **There was no way to undo.** The headline promise is "it can all be put back", and no
+  `rollback` command existed — there was only a CSV the owner was expected to reverse
+  by hand. `rollback` now exists: previews what it would restore, changes nothing without
   a named approval, puts every file back under its ORIGINAL name, and clears the folders it
   empties. `rollback.csv` gained an `original_name` column, without which a collision-renamed
   file could never be restored correctly. Verified: a library with a duplicate filename came back
   byte-identical to how it started.
-- **8/10: the cost preview exited as an error.** `transcribe` without `--yes` succeeded but
+- **The cost preview exited as an error.** `transcribe` without `--yes` succeeded but
   returned exit 1, indistinguishable from a real failure like missing ffmpeg. Exits 0 now.
-- **6/10: "nothing is ever deleted" conflicted with empty folders being cleared.** Reworded
+- **"Nothing is ever deleted" conflicted with empty folders being cleared.** Reworded
   everywhere to "no file is ever deleted", and the folder cleanup is now stated up front.
-- **4/10: the visual promised to remove folders it would not touch.** It showed the raw count of
+- **The visual promised to remove folders it would not touch.** It showed the raw count of
   near-empty folders rather than the folders the plan actually empties. Now computed exactly, and
   checked against what apply really clears.
-- **3/10: framed as Google-Drive-only.** It works on any folder — an external drive, a local
+- **Framed as Google-Drive-only.** It works on any folder — an external drive, a local
   Projects folder. Drive for Desktop is only how a Drive gets onto the machine.
 - Added `status`: which library is active, its state, and whether an undo is available.
 
@@ -84,35 +84,35 @@ fix held. Six new themes, counted by distinct agents.
 
 ## 0.5.0 — 2026-07-29
 
-Hardened against a 14-agent stress fleet, each agent playing a non-technical owner
-with a different awkward library and no help. Themes counted by distinct agents.
+First hardening round, run against a spread of awkward libraries with no help
+available — the position a non-technical owner is actually in.
 
-- **14/14 agents: one shared state folder for every library.** All state lived in a single
+- **One shared state folder for every library.** All state lived in a single
   `~/active/media-library-setup`, so scanning a second library silently overwrote the first
   library's plan and mixed both libraries into one rollback log. Anyone with two client shoots
   would have lost their undo history. Each library now gets its own state folder keyed to its
   path, and `MEDIA_LIBRARY_WORK_DIR` overrides the base so it can be tested anywhere.
-- **10/14: an empty or already-tidy library walked the owner through approving nothing.** scan
+- **An empty or already-tidy library walked the owner through approving nothing.** scan
   now stops with "this folder has nothing to organise", and apply refuses a no-op outright
   rather than asking for a signature on zero moves.
-- **8/14: the docs contradicted each other on renaming.** structure-rules.md said files get
+- **The docs contradicted each other on renaming.** structure-rules.md said files get
   renamed; SKILL.md said they never are. The code never renamed. Docs now agree with the code.
-- **8/14: the layout message was nonsense on edge cases** — a folder with no subfolders was
+- **The layout message was nonsense on edge cases** — a folder with no subfolders was
   told "its subfolders are already categories". Now says what it actually means.
-- **4/14: the setup gate contradicted the pricing.** It said not to proceed until everything was
+- **The setup gate contradicted the pricing.** It said not to proceed until everything was
   installed, while also saying organising is free. Only Drive for Desktop is required now, and
   `check` says which items are optional.
-- **3/14: transcribe blamed the owner for a step they had just done** — "Run scan and apply
+- **Transcribe blamed the owner for a step they had just done** — "Run scan and apply
   first" on a photos-only library. Now says there are no videos and nothing to pay for.
 
-40 -> 48 contract checks, one per theme above, so none of them can come back.
+40 -> 48 contract checks, one per issue above, so none of them can come back.
 
 ## 0.4.0 — 2026-07-29
 
 Cross-platform. It was Mac-only in one way that mattered.
 
 - **On Windows the two approval visuals never opened.** The open call was wrapped in a macOS
-  platform check, so a Windows member was told "two pages open in your browser" and nothing
+  platform check, so a Windows owner was told "two pages open in your browser" and nothing
   happened — silently removing the approval step the whole design rests on. Now opens on Mac,
   Windows and Linux, and if it cannot, it prints the paths and says they must be looked at.
 - `check` detects the computer and prints that computer's install line: brew, winget or apt.
@@ -133,24 +133,24 @@ Mac `open`, Windows `os.startfile`, Linux `xdg-open`.
 Plug-and-play pass. Aimed at a business owner who has never opened a terminal.
 
 - New `check` command as step one. Reports every missing prerequisite at once in plain
-  English with the fix for each, instead of the member discovering them one failed command
+  English with the fix for each, instead of them being discovered one failed command
   at a time. Finds Google Drive for Desktop across all its mount locations, and covers
   Python, the openai package, ffmpeg and the API key.
-- SKILL.md rewritten as a guided run, step 1 to 8. It now tells the agent to do the installs
-  rather than paste commands at the member, and to have the cost conversation up front rather
+- SKILL.md rewritten as a guided run, step 1 to 8. It now tells Claude to do the installs
+  rather than paste commands at the owner, and to have the cost conversation up front rather
   than at the moment of spending.
 - Costs stated before setup, not at the till: what is free, what is paid, per-hour rate, a
   table, and that $5 covers about 14 hours. Key setup walked through with real links.
 - setup.md gained the Python and openai-package step that was assumed but never covered, and
   a fix for each of its failure modes.
-- Ends by generating the member's install report, so they finish holding a document that
+- Ends by generating the owner's install report, so they finish holding a document that
   says what the thing does and what it cannot do.
 - Smoke test 28 -> 34 checks, the new ones covering the preflight, cost-before-spend ordering,
   the do-not-hand-commands-over rule, and the key never being echoed.
 
 ## 0.2.1 — 2026-07-29
 
-Fixed seven release blockers found by an independent Codex review — rollback truncation on
+Fixed seven release blockers found by an independent code review — rollback truncation on
 retry, a half-moved library on any single failure, over-broad junk and empty-folder deletion,
 a symlink that could overwrite its own destination, an approval gate that accepted whitespace
 and was never bound to the plan shown, a transcript name collision that billed twice, and
@@ -164,7 +164,7 @@ Switched from the Google Drive API to a local folder.
 - Works on a **Google Drive for Desktop** folder instead of the Drive API. Removes the Google
   Cloud project, OAuth consent screen and `gcloud` install that a non-technical person was never
   getting through. Reorganising locally syncs back to Drive on its own.
-- **Transcription is built in** — OpenAI `whisper-1`, the same model the reference pipeline uses.
+- **Transcription is built in** — OpenAI `whisper-1`.
   `transcribe` measures every video and prints the exact cost, and sends nothing until `--yes`.
   Already-transcribed videos are skipped, so an interrupted run costs nothing to resume.
 - Folder colours are now **macOS Finder tags** (Videos purple, Photos blue, Documents orange,

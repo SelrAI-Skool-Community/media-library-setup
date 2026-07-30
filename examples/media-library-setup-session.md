@@ -11,9 +11,8 @@ work on it as a normal folder. Scanning — read only, nothing will change.
 
 ```
 Scanned 'Footage' — read only, nothing changed.
-  6847 files in 109 folders, 2 levels deep
+  3412 files (742GB) in 109 folders, 2 levels deep
   48 folders hold 2 files or fewer
-  _Index       3435
   Videos       1596
   Photos       1539
   Documents     277
@@ -25,9 +24,10 @@ not the number of files.
 Working out a structure. Still not changing anything.
 
 ```
-Detected: event layout (its subfolders look like separate events).
+Treating this as a library of events — its subfolders look like separate events.
   109 folders (2 deep)  ->  82 folders (2 deep)
-  6847 files will move, 0 already correct
+  3412 files will move, 0 already correct
+  Nothing is deleted. Every move is logged and reversible.
 ```
 
 Two pictures opened in your browser:
@@ -38,7 +38,7 @@ Two pictures opened in your browser:
 The short version: one folder per event, and inside each, four folders — Videos, Photos,
 Documents, and `_Index` for the searchable text. Nothing goes deeper than that.
 
-6,847 files move. 27 near-empty folders disappear. **Nothing is deleted** — every move is
+3,412 files move. 27 near-empty folders disappear. **Nothing is deleted** — every move is
 written to a rollback file first, so this is fully reversible.
 
 Have a look at both, and tell me to go ahead when you are happy.
@@ -67,13 +67,14 @@ forty. If you still want the split after seeing that, say so and I will build it
 **Claude:**
 
 ```
-Applying: 6847 files to move. Nothing will be deleted.
-  created Brisbane 1 — 2026-05-07/Videos
-  created Brisbane 1 — 2026-05-07/Photos
+About to change:  ~/Library/CloudStorage/GoogleDrive-…/My Drive/Footage
+Applying: 3412 files to move. Nothing will be deleted.
+  Brisbane 1 — 2026-05-07/Videos
+  Brisbane 1 — 2026-05-07/Photos
   ...
-Done. 6847 files moved, 0 deleted.
+Done. 3412 files moved, 0 deleted.
   27 emptied folders cleared away.
-Rollback log: ~/active/media-library-setup/rollback.csv
+Rollback log: ~/active/media-library-setup/footage-4c1d8ba9/rollback.csv
 ```
 
 Done. On a Mac the folders are colour-tagged in Finder — Videos purple, Photos blue,
@@ -86,7 +87,8 @@ Next: transcribing, so you can ask for a moment instead of a filename. I measure
   Estimated cost: $25.26 USD (OpenAI whisper-1, $0.006/min)
   This is billed to your own OpenAI account.
 
-Nothing has been sent. Re-run with --yes to go ahead.
+Nothing has been sent and nothing has been charged.
+To go ahead:  library.py transcribe --yes
 ```
 
 Your call. Once that is done, this works:

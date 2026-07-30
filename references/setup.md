@@ -55,6 +55,9 @@ pip3 install openai
 `python3: command not found` on a Mac means the developer tools are missing. Run
 `xcode-select --install`, click through the installer, then try again.
 
+If `pip3` refuses with `externally-managed-environment`, that Python is managed by the system.
+Run `pip3 install --user --break-system-packages openai` instead.
+
 **Check it worked:** `python3 -c "import openai; print('ready')"` prints `ready`.
 
 ---
@@ -62,9 +65,9 @@ pip3 install openai
 ## 3. ffmpeg — reads the audio out of video files
 
 ```bash
-brew install ffmpeg          # Mac
-winget install ffmpeg        # Windows
-sudo apt install ffmpeg      # Linux
+brew install ffmpeg           # Mac
+winget install Gyan.FFmpeg    # Windows
+sudo apt install ffmpeg       # Linux
 ```
 
 No Homebrew on a Mac → install it from **https://brew.sh** first, then run the line above.
@@ -143,6 +146,7 @@ visuals and say yes.
 | Folder is there but empty | First sync still running | Wait; the Drive icon shows sync progress |
 | `ffmpeg: command not found` | Not installed, or a new terminal is needed | Re-run the install, then open a fresh terminal |
 | `No module named openai` | The package is not installed for this Python | `pip3 install openai` |
+| `externally-managed-environment` | That Python is system-managed | `pip3 install --user --break-system-packages openai` |
 | `python3: command not found` | Mac developer tools missing | `xcode-select --install`, then retry |
 | `OPENAI_API_KEY is not set` | The setting did not stick | Mac/Linux: re-run the `echo` line then `source ~/.zshrc`. Windows: re-run `setx`, then open a **new** terminal |
 | Folders have no colours | Colour tags are a Mac feature | Nothing is wrong — the folders are organised identically, just without colours |

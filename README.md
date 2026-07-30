@@ -13,8 +13,9 @@ Anyone whose Drive fills up faster than it gets filed. Event footage, client sho
 social content. If finding an old clip currently means twenty minutes of clicking through
 folders, this is for you.
 
-You do not need to be technical. You never type a command — Claude does all of it. You install
-one app, sign into your own Google account, and paste one key if you want the search feature.
+You do not need to be technical. Past the one install line below, you never type a command —
+Claude runs the rest and tells you what came back. You install one app, sign into your own
+Google account, and paste one key if you want the search feature.
 
 ---
 
@@ -78,14 +79,17 @@ until you confirm. Each video is only ever paid for once.
 
 ## Install
 
-Get the folder onto your computer, either way:
+Get the folder onto your computer. Two lines in Terminal:
 
 ```bash
+mkdir -p ~/.claude/skills
 git clone https://github.com/luke-heka/media-library-setup.git ~/.claude/skills/media-library-setup
 ```
 
-Not using git? Use the green **Code** button at the top of this page to download the folder,
-then move `media-library-setup` into `~/.claude/skills/`.
+Not using git? Use the green **Code** button at the top of this page → **Download ZIP**, unzip
+it, rename the unzipped folder from `media-library-setup-main` to `media-library-setup`, and
+put it inside `~/.claude/skills/`. The folder name has to match, or the paths below will not
+find it.
 
 Then paste this into Claude Code:
 
@@ -117,9 +121,11 @@ Organise my Google Drive media folder.
 | File | What it is |
 |---|---|
 | `SKILL.md` | The step-by-step Claude follows, from install to finished library |
+| `SETUP-PROMPT.md` | The same install prompt as above, on its own so it is easy to copy |
 | `references/setup.md` | Every install, with links and a fix for each way it fails |
 | `references/structure-rules.md` | Why the folders stay flat, and the rule that stops them nesting |
 | `scripts/library.py` | Does the work: checking, counting, planning, the pictures, moving, transcribing |
 | `scripts/smoke.sh` | A self-test that proves the safety gates still work. Runs offline |
 | `SELR-REPORT.html` | A full security and plain-English report on this skill. Open it in a browser |
 | `examples/` | A worked example of a real run |
+| `CHANGELOG.md` | What changed in each version |
